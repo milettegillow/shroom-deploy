@@ -1,7 +1,4 @@
 .tray {
-  position: absolute;
-  bottom: 80px;
-  left: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -64,8 +61,9 @@
   cursor: grab;
   transition: background 0.2s, opacity 0.15s;
   touch-action: none;
-  animation: wobble 3s ease-in-out infinite;
 }
+
+.wobbling { animation: wobble 3s ease-in-out infinite; }
 
 .emoji {
   font-size: 28px;

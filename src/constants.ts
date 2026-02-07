@@ -4,6 +4,7 @@ export const STATS = {
   fillTime: 15,
   hungerRate: 100 / 15,
   boredomRate: 100 / 15,
+  thirstRate: 100 / 20,
   feedHungerRelief: 30,
   feedBoredomRelief: 5,
   chatBoredomRelief: 15,
@@ -14,6 +15,7 @@ export const BEHAVIOR = {
   hungerThreshold: 70,
   boredomThreshold: 70,
   boredomInitiation: 40,
+  thirstThreshold: 70,
   boredomProbabilityScale: 400,
   complaintInterval: 12000,
   boredomCheckInterval: 3000,
@@ -56,6 +58,17 @@ export const FOOD_TYPES = {
 } as const
 
 export const FOOD_TYPE_KEYS = Object.keys(FOOD_TYPES) as FoodType[]
+
+export const MIST = {
+  thirstRelief: 25,
+  cooldownMs: 500,
+} as const
+
+export const POKE = {
+  cooldownMs: 800,
+  annoyanceThreshold: 5,
+  annoyanceWindow: 5000,
+} as const
 
 export const TTS = {
   normal: { pitch: 1.4, rate: 0.9, volume: 0.8 },

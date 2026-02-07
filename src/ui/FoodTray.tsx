@@ -51,7 +51,7 @@ export default function FoodTray() {
           {FOOD_TYPE_KEYS.map((type, i) => (
             <div
               key={type}
-              className={cx(styles.foodItem, disabled && styles.disabled, isDragging && dragFoodType === type && styles.pickedUp)}
+              className={cx(styles.foodItem, meter.fullness <= 70 && styles.wobbling, disabled && styles.disabled, isDragging && dragFoodType === type && styles.pickedUp)}
               style={{ animationDelay: `${i * 0.15}s` }}
               onPointerDown={(e) => onPointerDown(type, e)}
             >

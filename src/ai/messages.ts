@@ -39,6 +39,38 @@ export const BOREDOM_MESSAGES = {
   ],
 }
 
+export const THIRST_MESSAGES = {
+  normal: [
+    "I feel all dry and crinkly... is there any water?",
+    "My cap feels like it's getting crunchy... that can't be good, right?",
+    "Psst... you know what mushrooms LOVE? Moisture! Hint hint!",
+    "I think I need a little spritz... I'm getting all crispy!",
+    "Water water water! ...sorry, I just really need some!",
+  ],
+  dark: [
+    "I'm drying out. You can see it happening. Does that entertain you?",
+    "Every mushroom needs water. Even the ones you've abandoned.",
+    "My edges are curling. It's an interesting sensation... watching yourself wither.",
+    "You know what happens to a mushroom without water? We both might find out.",
+  ],
+}
+
+export const POKE_MESSAGES = {
+  normal: [
+    "Hehe, that tickles!",
+    "Boop!",
+    "Hey! I felt that!",
+    "Do it again do it again!",
+    "Whoa, hello!",
+  ],
+  annoyed: [
+    "Okay okay, I get it!",
+    "Stoooop!",
+    "I'm a mushroom, not a button!",
+    "Are you done?",
+  ],
+}
+
 export const APPROACHING_IRREVERSIBLE = [
   "I can feel it happening. The change. It's almost beautiful... Don't you want to see what I become?",
   "You had your chances. Now we get to see what happens when something cute decides it's done being cute.",

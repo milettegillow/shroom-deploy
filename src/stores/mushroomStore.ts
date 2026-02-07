@@ -2,34 +2,42 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { chat } from '../ai/aiService'
 import { buildSystemPrompt } from '../ai/prompts'
-import { STATS } from '../constants'
+import { STATS, MIST } from '../constants'
 import type { EvolutionState, Message } from '../types'
 
 interface MushroomState {
   hunger: number
   boredom: number
+  thirst: number
   evolution: EvolutionState
   conversationHistory: Message[]
   isConversing: boolean
   lastMushroomMessage: string | null
   lastMushroomMessageId: number
   lastFeedTime: number
+  lastMistTime: number
+  lastPokeTime: number
   feed: () => void
+  mist: () => void
+  poke: () => void
   sendMessage: (text: string) => Promise<void>
   receiveMessage: (text: string) => void
   tick: (dt: number) => void
   reset: () => void
 }
 
-const INITIAL: Omit<MushroomState, 'feed' | 'sendMessage' | 'receiveMessage' | 'tick' | 'reset'> = {
+const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'sendMessage' | 'receiveMessage' | 'tick' | 'reset'> = {
   hunger: 0,
   boredom: 0,
+  thirst: 0,
   evolution: 'normal',
   conversationHistory: [],
   isConversing: false,
   lastMushroomMessage: null,
   lastMushroomMessageId: 0,
   lastFeedTime: 0,
+  lastMistTime: 0,
+  lastPokeTime: 0,
 }
 
 function resolveEvolution(hunger: number, current: EvolutionState): EvolutionState {
@@ -48,6 +56,13 @@ export const useMushroomStore = create<MushroomState>()(
       boredom: Math.max(0, s.boredom - STATS.feedBoredomRelief),
       lastFeedTime: Date.now(),
     })),
+
+    mist: () => set((s) => ({
+      thirst: Math.max(0, s.thirst - MIST.thirstRelief),
+      lastMistTime: Date.now(),
+    })),
+
+    poke: () => set({ lastPokeTime: Date.now() }),
 
     sendMessage: async (text) => {
       const { conversationHistory, hunger, boredom, evolution } = get()
@@ -83,7 +98,8 @@ export const useMushroomStore = create<MushroomState>()(
       if (s.evolution === 'demonic') return s
       const hunger = Math.min(100, s.hunger + STATS.hungerRate * dt)
       const boredom = Math.min(100, s.boredom + STATS.boredomRate * dt)
-      return { hunger, boredom, evolution: resolveEvolution(hunger, s.evolution) }
+      const thirst = Math.min(100, s.thirst + STATS.thirstRate * dt)
+      return { hunger, boredom, thirst, evolution: resolveEvolution(hunger, s.evolution) }
     }),
 
     reset: () => set({ ...INITIAL }),

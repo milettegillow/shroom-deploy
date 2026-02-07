@@ -4,6 +4,7 @@ import { useTTS } from '../hooks/useTTS'
 import FoodTray from './FoodTray'
 import ChatBox from './ChatBox'
 import SpeechBubble from './SpeechBubble'
+import MistButton from './MistButton'
 import GameOver from './GameOver'
 import styles from './HUD.module.css'
 
@@ -18,7 +19,10 @@ export default function HUD() {
       {phase === 'playing' && (
         <>
           <SpeechBubble />
-          <FoodTray />
+          <div className={styles.toolbar}>
+            <FoodTray />
+            <MistButton />
+          </div>
           <ChatBox />
         </>
       )}

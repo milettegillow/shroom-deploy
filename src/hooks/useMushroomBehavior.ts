@@ -9,11 +9,11 @@ export function useMushroomBehavior() {
     const interval = setInterval(() => {
       if (useGameStore.getState().phase !== 'playing') return
 
-      const { hunger, boredom, evolution, isConversing, receiveMessage } =
+      const { hunger, boredom, thirst, evolution, isConversing, receiveMessage } =
         useMushroomStore.getState()
 
       const message = conversationManager.update(
-        Date.now(), hunger, boredom, evolution, isConversing, 0,
+        Date.now(), hunger, boredom, thirst, evolution, isConversing, 0,
       )
 
       if (message) receiveMessage(message)

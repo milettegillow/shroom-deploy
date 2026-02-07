@@ -10,3 +10,14 @@
   flex-direction: column;
   justify-content: flex-end;
 }
+
+.toolbar {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  pointer-events: auto;
+  user-select: none;
+}
