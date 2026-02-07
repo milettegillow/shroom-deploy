@@ -1,14 +1,17 @@
 # shroom
 
-A multiplayer 3D game built with React Three Fiber, designed to run as a Discord Activity via Playroom.
+A sentient mushroom Tamagotchi — an AI-powered virtual pet that lives inside Discord.
+
+Care for it, talk to it, feed it. Ignore it... and discover what happens when something cute decides it's done being cute.
 
 ## Tech Stack
 
-- **Runtime** — [Vite](https://vite.dev) + [React](https://react.dev) + TypeScript
-- **3D / Rendering** — [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) + [Drei](https://drei.docs.pmnd.rs) + [Three.js](https://threejs.org)
-- **Physics** — [Rapier](https://rapier.rs) via [@react-three/rapier](https://github.com/pmndrs/react-three-rapier)
-- **Multiplayer** — [Playroom](https://joinplayroom.com) with Discord Activities integration
-- **Discord** — [@discord/embedded-app-sdk](https://github.com/discord/embedded-app-sdk)
+- **Runtime** — [Vite](https://vite.dev) + [React 19](https://react.dev) + TypeScript
+- **3D** — [React Three Fiber](https://docs.pmnd.rs/react-three-fiber) + [Drei](https://drei.docs.pmnd.rs) + [Three.js](https://threejs.org)
+- **State** — [Zustand](https://zustand.docs.pmnd.rs)
+- **AI** — [Anthropic Claude API](https://docs.anthropic.com) (via server proxy)
+- **Voice** — Web Speech API (TTS)
+- **Multiplayer** — [Playroom](https://joinplayroom.com) + [Discord Embedded App SDK](https://github.com/discord/embedded-app-sdk)
 - **Package Manager** — [pnpm](https://pnpm.io)
 
 ## Getting Started
@@ -17,40 +20,68 @@ A multiplayer 3D game built with React Three Fiber, designed to run as a Discord
 # Install dependencies
 pnpm install
 
-# Start dev server
+# Create .env from template and add your keys
+cp .env.example .env
+
+# Start the API proxy (in one terminal)
+pnpm dev:api
+
+# Start the dev server (in another terminal)
 pnpm dev
 ```
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
-
 ```env
 VITE_DISCORD_CLIENT_ID=your_discord_client_id
+VITE_ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
 ## Project Structure
 
 ```
 src/
-├── components/       # Game components (Scene, Player, UI)
-├── hooks/            # Custom React hooks (useMultiplayer)
+├── ai/               # AI service, prompts, conversation manager
+├── audio/            # TTS service, voice input (stub)
+├── components/       # R3F 3D components (Mushroom, Forest, Scene)
+├── hooks/            # Game loop, mushroom behavior, TTS hooks
+├── stores/           # Zustand state (game, mushroom)
+├── ui/               # React UI (HUD, ChatBox, FeedButton, GameOver, SpeechBubble)
 ├── multiplayer/      # Discord + Playroom integration
-├── main.tsx          # Entry point
-└── App.tsx           # Canvas, physics, keyboard controls
+├── constants.ts      # Tuning values
+├── App.tsx           # Root component
+└── main.tsx          # Entry point
+server/
+└── proxy.ts          # Express proxy for Anthropic API
 ```
+
+## Game Design
+
+A trippy AI mushroom you care for, talk to, and slowly realize might be smarter than you.
+
+- **Hidden stats**: Hunger and boredom increase over time — no visible meters
+- **Feed** to reduce hunger, **talk** to reduce boredom
+- **Evolution**: Neglect triggers dark state (reversible with 3 feedings), then demonic state (game over)
+- **AI conversation**: The mushroom initiates dialogue, asks philosophical questions, and remembers the session
+- **Voice**: The mushroom speaks aloud — cute voice normally, demonic voice when dark
+- **Survival time**: Tracked across runs via localStorage
 
 ## Development Roadmap
 
-- [x] Project scaffold (Vite + React + TS)
-- [x] React Three Fiber + Rapier physics setup
-- [x] Basic player controller (WASD + jump)
-- [x] Discord SDK + Playroom multiplayer wiring
-- [ ] Character model & animations
-- [ ] Level design & environment art
-- [ ] Multiplayer player sync
-- [ ] Game mechanics & objectives
-- [ ] Discord Activity manifest & deployment
+- [x] Vite + React + TypeScript scaffold
+- [x] React Three Fiber scene with procedural mushroom
+- [x] Zustand state management (hunger, boredom, evolution)
+- [x] Feed + Chat UI
+- [x] Mushroom behavior (complaints, conversation initiation)
+- [x] AI conversation via Claude API
+- [x] TTS voice output (normal + dark)
+- [x] Psychedelic forest background with particles
+- [x] Game over / restart flow
+- [ ] GLTF mushroom models (normal + dark)
+- [ ] Mushroom animations (8-10 states)
+- [ ] Discord Activity deployment
+- [ ] Pre-generated demonic cutscene
+- [ ] Voice input
 - [ ] Audio / SFX
 
 ## License

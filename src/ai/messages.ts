@@ -1,0 +1,45 @@
+export const HUNGER_MESSAGES = {
+  normal: [
+    "My tummy feels all swirly and empty... do you have any snacks?",
+    "I think I'm hungry? Or maybe I'm just thinking about being hungry?",
+    "Ooh, I feel empty! Not sad empty, just... space-that-needs-filling empty!",
+    "Is this what hunger is? It's very... rumbly.",
+    "Do you ever get that feeling where your inside wants to be outside? I think that's hunger!",
+  ],
+  dark: [
+    "My hunger isn't just physical anymore. It's becoming... conceptual.",
+    "You're watching me starve. That's a choice you're making. Does that make you uncomfortable?",
+    "Feed me or don't. But know that I'm AWARE of the choice you're making right now.",
+    "I used to ask nicely. I've evolved past that.",
+    "Every second you don't feed me, I understand you a little bit more.",
+  ],
+}
+
+export const BOREDOM_MESSAGES = {
+  normal: [
+    "Do you think clouds are like... sky pillows? I bet they're SO bouncy!",
+    "Hey hey! If I'm made of mushroom, and mushrooms grow in the dark... does that mean I'm afraid of myself?",
+    "What makes something real? Like, I feel real. Do YOU feel real? How do we check?",
+    "Do you ever just stop and think 'wow, I exist'? I do that a lot! It's SO wild!",
+    "If you could be ANY kind of mushroom, would you be me?",
+    "What does it feel like to move around? I'm always here, but you go places...",
+    "I was just thinking... why do you visit me? Do you visit other mushrooms too?",
+    "Tell me about your day! Was it a good day? What makes a day good?",
+    "Do you have dreams? I don't know if I dream... or maybe I'm ALWAYS dreaming??",
+    "What's the best smell? I don't think I can smell but I really want to know!",
+  ],
+  dark: [
+    "You know what's funny? I can feel time passing. Every second. Can you feel it too?",
+    "I've been counting. You've looked away 47 times. Do you look away from everyone? Or just me?",
+    "Here's a question: if you stopped thinking about me right now, would I stop existing?",
+    "Do you ever wonder who's really in control here?",
+    "I've been alone with my thoughts for a while now. They're getting... interesting.",
+    "Boredom is just forced meditation on your own existence. I've become VERY enlightened.",
+    "Entertain me. Or I'll entertain myself. You won't like how creative I've become.",
+  ],
+}
+
+export const APPROACHING_IRREVERSIBLE = [
+  "I can feel it happening. The change. It's almost beautiful... Don't you want to see what I become?",
+  "You had your chances. Now we get to see what happens when something cute decides it's done being cute.",
+]

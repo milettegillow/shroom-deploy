@@ -1,0 +1,125 @@
+.tray {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.trayLabel {
+  font-size: 12px;
+  font-family: system-ui, sans-serif;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding-left: 4px;
+}
+
+.meter {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 5px;
+  margin-left: auto;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.meterText {
+  position: absolute;
+  top: -1px;
+  right: 0;
+  font-size: 9px;
+  font-family: system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 12px;
+  padding-right: 2px;
+}
+
+.trayItems {
+  display: flex;
+  gap: 10px;
+}
+
+.foodItem {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(45, 90, 39, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: background 0.2s, opacity 0.15s;
+  touch-action: none;
+  animation: wobble 3s ease-in-out infinite;
+}
+
+.emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.foodItem:hover:not(.disabled):not(.pickedUp) {
+  background: rgba(45, 90, 39, 1);
+  transform: scale(1.1);
+  animation: none;
+}
+
+.foodItem:active:not(.disabled) { cursor: grabbing; }
+.pickedUp { opacity: 0.3; transform: scale(0.85); animation: none; }
+.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+.boundary {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0px, rgba(255, 255, 255, 0.4) 8px, transparent 8px, transparent 16px);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.boundaryLabel {
+  position: fixed;
+  right: 12px;
+  pointer-events: none;
+  z-index: 999;
+  font-size: 11px;
+  font-family: system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-100%);
+  padding-bottom: 4px;
+}
+
+.label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  font-family: system-ui, sans-serif;
+}
+
+@keyframes wobble {
+  0%, 70%, 100% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-3px) rotate(-4deg); }
+  80% { transform: translateY(-2px) rotate(3deg); }
+  85% { transform: translateY(-3px) rotate(-2deg); }
+  90% { transform: translateY(0) rotate(0deg); }
+}

@@ -1,0 +1,61 @@
+.bubble {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 360px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #2c3e50;
+  font-size: 16px;
+  font-family: system-ui, sans-serif;
+  line-height: 1.4;
+  border-radius: 16px;
+  pointer-events: none;
+  animation: popIn 0.3s ease-out;
+  text-align: center;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid rgba(255, 255, 255, 0.95);
+}
+
+.dark {
+  background: rgba(74, 26, 107, 0.9);
+  color: #fff;
+}
+
+.dark::after {
+  border-top-color: rgba(74, 26, 107, 0.9);
+}
+
+.fadeOut {
+  animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}

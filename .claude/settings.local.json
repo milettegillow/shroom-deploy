@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(pnpm build:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(node -e:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}
