@@ -33,10 +33,10 @@ export default function TargetReticle() {
 
   const [x, y, z] = THROW.mouthPos
   const r = THROW.hitRadius
-  const mat = <meshBasicMaterial color={WHITE} transparent opacity={0} depthWrite={false} />
+  const mat = <meshBasicMaterial color={WHITE} transparent opacity={0} depthWrite={false} depthTest={false} />
 
   return (
-    <group position={[x, y, z + 0.05]}>
+    <group position={[x, y, z + 0.05]} renderOrder={100}>
       <mesh ref={glowRef}>
         <circleGeometry args={[r * 1.2, SEGS]} />
         {mat}

@@ -1,0 +1,115 @@
+.wrapper {
+  position: relative;
+}
+
+.label {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  font-family: system-ui, sans-serif;
+}
+
+.jar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(90, 75, 40, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: background 0.2s, box-shadow 0.3s, opacity 0.15s;
+  touch-action: none;
+}
+
+.jar:hover:not(.empty):not(.dragging) {
+  background: rgba(110, 90, 50, 1);
+  transform: scale(1.1);
+}
+
+.jar:active:not(.empty) { cursor: grabbing; }
+.dragging { opacity: 0.3; transform: scale(0.85); }
+.empty { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+.glowing {
+  animation: jarPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes jarPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.06); filter: brightness(1.2); }
+}
+
+.emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(255, 153, 68, 0.9);
+  color: #2a1800;
+  font-size: 10px;
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.boundary {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(90deg, rgba(255, 200, 80, 0.4) 0px, rgba(255, 200, 80, 0.4) 8px, transparent 8px, transparent 16px);
+  box-shadow: 0 0 8px rgba(255, 180, 40, 0.15);
+}
+
+.boundaryLabel {
+  position: fixed;
+  right: 12px;
+  pointer-events: none;
+  z-index: 999;
+  font-size: 11px;
+  font-family: system-ui, sans-serif;
+  color: rgba(255, 200, 80, 0.4);
+  transform: translateY(-100%);
+  padding-bottom: 4px;
+}
+
+.hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 999;
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+  color: rgba(255, 220, 100, 0.85);
+  background: rgba(30, 25, 15, 0.7);
+  padding: 6px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+  animation: hintFadeIn 0.2s ease-out;
+}
+
+@keyframes hintFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

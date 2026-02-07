@@ -1,57 +1,7 @@
-.tray {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: auto;
-  user-select: none;
-}
-
-.trayLabel {
-  font-size: 12px;
-  font-family: system-ui, sans-serif;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding-left: 4px;
-}
-
-.meter {
-  position: relative;
-  width: 100%;
-  height: 10px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.meterFill {
-  height: 100%;
-  border-radius: 5px;
-  margin-left: auto;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-
-.meterText {
-  position: absolute;
-  top: -1px;
-  right: 0;
-  font-size: 9px;
-  font-family: system-ui, sans-serif;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 12px;
-  padding-right: 2px;
-}
-
-.trayItems {
-  display: flex;
-  gap: 10px;
-}
-
 .foodItem {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(45, 90, 39, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -66,7 +16,7 @@
 .wobbling { animation: wobble 3s ease-in-out infinite; }
 
 .emoji {
-  font-size: 28px;
+  font-size: 20px;
   line-height: 1;
 }
 
@@ -105,10 +55,10 @@
 
 .label {
   position: absolute;
-  bottom: -18px;
+  bottom: -16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 10px;
+  font-size: 9px;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   font-family: system-ui, sans-serif;

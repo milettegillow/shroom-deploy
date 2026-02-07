@@ -1,0 +1,6 @@
+# API Worker — proxies chat requests to Anthropic
+# Deploy: npx wrangler deploy -c wrangler.api.toml
+# Secret: npx wrangler secret put ANTHROPIC_API_KEY -c wrangler.api.toml
+name = "shroom-api"
+main = "worker/index.ts"
+compatibility_date = "2026-02-07"

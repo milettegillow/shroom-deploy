@@ -55,11 +55,12 @@ export default function FoodProjectile() {
   }
 
   function resolve(outcome: 'hit' | 'miss') {
+    const foodType = proj.current.foodType
     proj.current.active = false
     groupRef.current!.visible = false
     if (outcome === 'hit') {
-      useMushroomStore.getState().feed()
-      useFeedingStore.getState().recordHit()
+      useMushroomStore.getState().feed(foodType)
+      useFeedingStore.getState().recordHit(foodType)
     } else {
       useFeedingStore.getState().recordMiss()
     }

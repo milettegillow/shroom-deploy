@@ -1,10 +1,9 @@
 import { useRef, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { BEHAVIOR, POKE } from '../constants'
-import { POKE_MESSAGES } from '../ai/messages'
+import { POKE_MESSAGES, FIREFLY_MESSAGES } from '../ai/messages'
 
 const COLORS = {
   normal: { cap: new THREE.Color('#c0392b'), stem: new THREE.Color('#e8d5b7'), spots: new THREE.Color('#ffffff'), eyes: new THREE.Color('#2c3e50') },
@@ -79,6 +78,9 @@ export default function Mushroom() {
   const lastPokeRef = useRef(0)
   const pokeTimestamps = useRef<number[]>([])
 
+  const giftGlow = useRef(0)
+  const lastGiftRef = useRef(0)
+
   const handlePoke = useCallback(() => {
     const now = Date.now()
     const store = useMushroomStore.getState()
@@ -98,7 +100,7 @@ export default function Mushroom() {
   useFrame(({ clock }, delta) => {
     if (!groupRef.current) return
     const t = clock.elapsedTime
-    const { evolution, hunger, boredom, lastFeedTime, lastMistTime, lastPokeTime } = useMushroomStore.getState()
+    const { evolution, hunger, boredom, lastFeedTime, lastMistTime, lastPokeTime, lastGiftTime, lastGiftCount } = useMushroomStore.getState()
     const isDark = evolution === 'dark'
     const mode = isDark ? 'dark' : 'normal'
 
@@ -122,23 +124,44 @@ export default function Mushroom() {
       pokeJolt.current = 1
     }
 
+    // Gift detection
+    if (lastGiftTime > 0 && lastGiftTime !== lastGiftRef.current) {
+      lastGiftRef.current = lastGiftTime
+      giftGlow.current = 1
+      feedBounce.current = 0.8
+      const store = useMushroomStore.getState()
+      const dark = evolution === 'dark'
+      let msg: string
+      if (dark) {
+        msg = pickRandom(FIREFLY_MESSAGES.dark)
+      } else if (lastGiftCount >= 10) {
+        msg = pickRandom(FIREFLY_MESSAGES.normal.lots)
+      } else if (lastGiftCount >= 5) {
+        msg = pickRandom(FIREFLY_MESSAGES.normal.many)
+      } else {
+        msg = pickRandom(FIREFLY_MESSAGES.normal.few)
+      }
+      store.receiveMessage(msg)
+    }
+
     // Decay animations
     const anim = hunger >= BEHAVIOR.hungerThreshold ? ANIM.hungry : ANIM.happy
     feedBounce.current *= 0.95
     talkWobble.current *= 0.93
-    mistShimmy.current *= 0.92
+    mistShimmy.current *= 0.94
     pokeJolt.current *= 0.88
+    giftGlow.current *= 0.96
 
-    // Position: base bounce + feed bounce + poke jolt
-    groupRef.current.position.y = anim.baseY + Math.sin(t * anim.bounceSpeed) * anim.bounceAmt + feedBounce.current * Math.sin(t * 8) * 0.15
-    groupRef.current.position.x = pokeJolt.current * Math.sin(t * 20) * 0.05
+    // Position: base bounce + feed bounce + poke jolt + mist shiver
+    groupRef.current.position.y = anim.baseY + Math.sin(t * anim.bounceSpeed) * anim.bounceAmt + feedBounce.current * Math.sin(t * 8) * 0.15 + mistShimmy.current * Math.sin(t * 18) * 0.04
+    groupRef.current.position.x = pokeJolt.current * Math.sin(t * 20) * 0.05 + mistShimmy.current * Math.sin(t * 22) * 0.03
 
     // Rotation: sway + talk wobble + mist shimmy
     const swayAnim = boredom >= BEHAVIOR.boredomThreshold ? ANIM.hungry : ANIM.happy
     groupRef.current.rotation.z =
       Math.sin(t * swayAnim.swaySpeed) * swayAnim.swayAmt +
       talkWobble.current * Math.sin(t * 12) * 0.08 +
-      mistShimmy.current * Math.sin(t * 15) * 0.1
+      mistShimmy.current * Math.sin(t * 15) * 0.2
 
     // Squash/stretch + poke squish
     const squash = 1 + Math.sin(t * anim.bounceSpeed) * 0.02
@@ -150,7 +173,10 @@ export default function Mushroom() {
     const targetEmissive = EMISSIVE[mode]
     for (const key of COLOR_KEYS) currentColors.current[key].lerp(targetColors[key], LERP)
 
-    matRefs.cap.current?.color.copy(currentColors.current.cap)
+    if (matRefs.cap.current) {
+      matRefs.cap.current.color.copy(currentColors.current.cap)
+      matRefs.cap.current.emissiveIntensity = giftGlow.current * 0.5
+    }
     matRefs.stem.current?.color.copy(currentColors.current.stem)
     if (matRefs.spots.current) {
       matRefs.spots.current.color.copy(currentColors.current.spots)
@@ -187,7 +213,7 @@ export default function Mushroom() {
       <group position={[0, 0.3, 0]} rotation={[CAP_TILT, 0, 0]}>
         <mesh castShadow>
           <sphereGeometry args={[CAP_RADIUS, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshStandardMaterial ref={matRefs.cap} color="#c0392b" />
+          <meshStandardMaterial ref={matRefs.cap} color="#c0392b" emissive="#ffaa00" emissiveIntensity={0} />
         </mesh>
         {SPOTS.map((spot, i) => (
           <group key={i} position={spot.position} rotation={spot.rotation}>
@@ -223,18 +249,6 @@ export default function Mushroom() {
         <meshStandardMaterial color={FACE_COLOR} />
       </mesh>
 
-      {/* Mist water particles */}
-      {mistShimmy.current > 0.1 && (
-        <Sparkles
-          count={20}
-          size={3}
-          scale={[1, 1.5, 1]}
-          position={[0, 0.8, 0]}
-          speed={2}
-          color="#88ccff"
-          opacity={0.7}
-        />
-      )}
     </group>
   )
 }

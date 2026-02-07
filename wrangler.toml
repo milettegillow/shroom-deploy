@@ -1,0 +1,7 @@
+# Frontend — Cloudflare Pages
+# Deploys the Vite build output as a static site
+# Build: pnpm run build
+# Deploy: npx wrangler deploy
+name = "shroom"
+compatibility_date = "2026-02-07"
+pages_build_output_dir = "dist"

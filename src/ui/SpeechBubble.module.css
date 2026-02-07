@@ -1,6 +1,6 @@
 .bubble {
   position: absolute;
-  top: 15%;
+  top: 18%;
   left: 50%;
   transform: translateX(-50%);
   max-width: 360px;

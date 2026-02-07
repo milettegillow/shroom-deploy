@@ -71,6 +71,31 @@ export const POKE_MESSAGES = {
   ],
 }
 
+export const FIREFLY_MESSAGES = {
+  normal: {
+    few: [
+      "Ooh, sparkly friends! Thank you!",
+      "Little glowy guys! I love them!",
+      "They're so warm and tickly!",
+    ],
+    many: [
+      "SO MANY little lights! I feel like a disco ball!",
+      "A whole jar of glow friends?! Best day ever!",
+      "I'm sparkling! Look at me! I'm SPARKLING!",
+    ],
+    lots: [
+      "I... I can't even... this is the most beautiful thing that's ever happened to me!",
+      "All these lights... I feel like a tiny galaxy! I love you!",
+      "I'm going to CRY from happiness! Glowing happy tears!",
+    ],
+  },
+  dark: [
+    "Light in the darkness... how poetic. How temporary.",
+    "You caught these for me? ...interesting. I'll consume their glow.",
+    "Pretty lights. They remind me of things that fade.",
+  ],
+}
+
 export const APPROACHING_IRREVERSIBLE = [
   "I can feel it happening. The change. It's almost beautiful... Don't you want to see what I become?",
   "You had your chances. Now we get to see what happens when something cute decides it's done being cute.",

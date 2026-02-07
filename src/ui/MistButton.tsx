@@ -1,90 +1,156 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { MIST } from '../constants'
 import styles from './MistButton.module.css'
 
 const cx = (...args: (string | false | undefined)[]) => args.filter(Boolean).join(' ')
 
-interface SprayDot {
+interface MistParticle {
+  id: number
+  x: number
+  y: number
+  size: number
+  delay: number
+  drift: number
+}
+
+interface HitSplash {
   id: number
   x: number
   y: number
 }
 
-function thirstMeter(thirst: number) {
-  const hydration = 100 - Math.round(thirst)
-  const color = hydration <= 30 ? '#5588cc' : hydration <= 60 ? '#4498dd' : '#33aaee'
-  const label = hydration > 70 ? 'Hydrated' : hydration > 40 ? 'Thirsty' : 'Parched!'
-  return { hydration, color, label }
-}
-
-let dotId = 0
+let nextId = 0
 
 export default function MistButton() {
   const [active, setActive] = useState(false)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
-  const [sprays, setSprays] = useState<SprayDot[]>([])
+  const [particles, setParticles] = useState<MistParticle[]>([])
+  const [splashes, setSplashes] = useState<HitSplash[]>([])
   const lastSprayRef = useRef(0)
   const thirst = useMushroomStore((s) => s.thirst)
-  const meter = thirstMeter(thirst)
+  const needsMist = (100 - Math.round(thirst)) <= 40
 
-  const handleToggle = useCallback(() => setActive((a) => !a), [])
+  const deactivate = useCallback(() => setActive(false), [])
 
-  const handleMove = useCallback((e: PointerEvent) => {
-    setCursorPos({ x: e.clientX, y: e.clientY })
+  const handleToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    setActive((a) => !a)
   }, [])
 
-  const handleSpray = useCallback((e: MouseEvent) => {
+  // Escape key or right-click to drop the mister
+  useEffect(() => {
+    if (!active) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') deactivate() }
+    const onContext = (e: MouseEvent) => { e.preventDefault(); deactivate() }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('contextmenu', onContext)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('contextmenu', onContext)
+    }
+  }, [active, deactivate])
+
+  const handleSpray = useCallback((e: React.MouseEvent) => {
     const now = Date.now()
     if (now - lastSprayRef.current < MIST.cooldownMs) return
     lastSprayRef.current = now
-    useMushroomStore.getState().mist()
 
-    const newDots: SprayDot[] = Array.from({ length: 8 }, () => ({
-      id: dotId++,
-      x: e.clientX + (Math.random() - 0.5) * 40,
-      y: e.clientY + (Math.random() - 0.5) * 40,
-    }))
-    setSprays((prev) => [...prev, ...newDots])
+    // Hit detection: spray must land near the mushroom (roughly viewport center)
+    const centerX = window.innerWidth / 2
+    const centerY = window.innerHeight / 2
+    const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY)
+    const hit = dist < MIST.hitRadius
+
+    // Spawn a mix of larger misty blobs and smaller solid droplets
+    const newParticles: MistParticle[] = [
+      // Misty blobs
+      ...Array.from({ length: 10 }, () => ({
+        id: nextId++,
+        x: e.clientX + (Math.random() - 0.5) * 180,
+        y: e.clientY - 20 - Math.random() * 40,
+        size: 14 + Math.random() * 20,
+        delay: Math.random() * 0.15,
+        drift: (Math.random() - 0.5) * 30,
+      })),
+      // Smaller solid droplets
+      ...Array.from({ length: 10 }, () => ({
+        id: nextId++,
+        x: e.clientX + (Math.random() - 0.5) * 140,
+        y: e.clientY - 10 - Math.random() * 30,
+        size: 4 + Math.random() * 6,
+        delay: Math.random() * 0.1,
+        drift: (Math.random() - 0.5) * 20,
+      })),
+    ]
+    setParticles((prev) => [...prev, ...newParticles])
     setTimeout(() => {
-      setSprays((prev) => prev.filter((d) => !newDots.includes(d)))
-    }, 600)
-  }, [])
+      setParticles((prev) => prev.filter((p) => !newParticles.includes(p)))
+    }, 1600)
 
-  useEffect(() => {
-    if (!active) return
-    window.addEventListener('pointermove', handleMove)
-    window.addEventListener('click', handleSpray)
-    return () => {
-      window.removeEventListener('pointermove', handleMove)
-      window.removeEventListener('click', handleSpray)
+    // Delay mist effect until particles visually reach the mushroom
+    if (hit) {
+      setTimeout(() => {
+        useMushroomStore.getState().mist()
+        const splashId = nextId++
+        setSplashes((prev) => [...prev, { id: splashId, x: centerX, y: centerY }])
+        setTimeout(() => {
+          setSplashes((prev) => prev.filter((s) => s.id !== splashId))
+        }, 1000)
+      }, 500)
     }
-  }, [active, handleMove, handleSpray])
+  }, [])
 
   return (
     <>
       <div className={styles.wrapper}>
-        <span className={styles.label}>Mist</span>
-        <div className={styles.meter}>
-          <div className={styles.meterFill} style={{ width: `${meter.hydration}%`, background: meter.color }} />
-          <span className={styles.meterText}>{meter.label}</span>
-        </div>
         <div
-          className={cx(styles.button, active && styles.active)}
+          className={cx(styles.button, active && styles.active, needsMist && styles.shake)}
           onClick={handleToggle}
         >
           <span className={styles.emoji}>🚿</span>
         </div>
+        <span className={styles.label}>Mist</span>
       </div>
 
-      {active && (
-        <div className={styles.cursor} style={{ left: cursorPos.x, top: cursorPos.y }}>
-          🚿
-        </div>
+      {/* Full-screen spray zone portal — sits above R3F canvas (z-index 9)
+          but below HUD toolbar (z-index 10). Captures all clicks for spraying
+          and blocks them from triggering mushroom pokes. */}
+      {active && createPortal(
+        <div
+          className={styles.sprayZone}
+          onClick={handleSpray}
+          onPointerMove={(e) => setCursorPos({ x: e.clientX, y: e.clientY })}
+        >
+          <div className={styles.cursor} style={{ left: cursorPos.x, top: cursorPos.y }}>
+            🚿
+          </div>
+        </div>,
+        document.body
       )}
 
-      {sprays.map((dot) => (
-        <div key={dot.id} className={styles.spray} style={{ left: dot.x, top: dot.y }} />
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className={styles.mistParticle}
+          style={{
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            animationDelay: `${p.delay}s`,
+            '--drift': `${p.drift}px`,
+          } as React.CSSProperties}
+        />
+      ))}
+
+      {splashes.map((s) => (
+        <div
+          key={s.id}
+          className={styles.hitSplash}
+          style={{ left: s.x, top: s.y }}
+        />
       ))}
     </>
   )

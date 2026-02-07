@@ -1,50 +1,21 @@
 .wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-self: flex-end;
+  position: relative;
 }
 
 .label {
-  font-size: 12px;
-  font-family: system-ui, sans-serif;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding-left: 4px;
-}
-
-.meter {
-  position: relative;
-  width: 100%;
-  height: 10px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.meterFill {
-  height: 100%;
-  border-radius: 5px;
-  margin-left: auto;
-  transition: width 0.3s ease, background 0.3s ease;
-}
-
-.meterText {
   position: absolute;
-  top: -1px;
-  right: 0;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
   font-family: system-ui, sans-serif;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 12px;
-  padding-right: 2px;
 }
 
 .button {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(30, 80, 120, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -68,8 +39,27 @@
 }
 
 .emoji {
-  font-size: 28px;
+  font-size: 20px;
   line-height: 1;
+}
+
+.shake {
+  animation: shake 0.4s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* Full-screen overlay that captures clicks when mist is active.
+   z-index 9 = above R3F canvas, below HUD toolbar (z-index 10). */
+.sprayZone {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  cursor: none;
 }
 
 .cursor {
@@ -82,18 +72,63 @@
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
-.spray {
+.mistParticle {
   position: fixed;
   pointer-events: none;
   z-index: 999;
-  width: 6px;
-  height: 6px;
   border-radius: 50%;
-  background: rgba(120, 200, 255, 0.7);
-  animation: sprayDrop 0.6s ease-out forwards;
+  background: radial-gradient(
+    circle,
+    rgba(180, 225, 255, 0.85) 0%,
+    rgba(160, 215, 255, 0.6) 35%,
+    rgba(140, 200, 250, 0.2) 70%,
+    transparent 100%
+  );
+  filter: blur(1px);
+  animation: mistFall 1.6s ease-out forwards;
 }
 
-@keyframes sprayDrop {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.3) translateY(30px); }
+@keyframes mistFall {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  30% {
+    opacity: 0.75;
+    transform: translate(calc(-50% + var(--drift, 0px)), -50%) scale(1) translateY(70px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--drift, 0px)), -50%) scale(1.2) translateY(160px);
+  }
+}
+
+.hitSplash {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid rgba(140, 210, 255, 0.6);
+  background: radial-gradient(
+    circle,
+    rgba(140, 210, 255, 0.2) 0%,
+    transparent 70%
+  );
+  animation: splashRing 1s ease-out forwards;
+}
+
+@keyframes splashRing {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.5);
+  }
 }

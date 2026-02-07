@@ -5,7 +5,6 @@ export const STATS = {
   hungerRate: 100 / 15,
   boredomRate: 100 / 15,
   thirstRate: 100 / 20,
-  feedHungerRelief: 30,
   feedBoredomRelief: 5,
   chatBoredomRelief: 15,
   darkThreshold: 65,
@@ -43,7 +42,6 @@ export const THROW = {
   foodScale: 0.18,
   offscreenY: -4,
   maxFlight: 3,
-  cooldownMs: 1500,
   mouthPos: [0, 0.12, 0.3] as [number, number, number],
   velocityWindow: 80,
   dragCeiling: 0.75,
@@ -51,10 +49,10 @@ export const THROW = {
 } as const
 
 export const FOOD_TYPES = {
-  deadLeaf:  { label: 'Dead Leaf',  emoji: '🍂', color: '#8B6914' },
-  rottenLog: { label: 'Rotten Log', emoji: '🪵', color: '#5C4033' },
-  compost:   { label: 'Compost',    emoji: '🧅', color: '#4A6741' },
-  barkChip:  { label: 'Bark Chip',  emoji: '🪨', color: '#8B7355' },
+  barkChip:  { label: 'Bark Chip',  emoji: '🪨', color: '#8B7355', hungerRelief: 12, cooldownMs: 800 },
+  deadLeaf:  { label: 'Dead Leaf',  emoji: '🍂', color: '#8B6914', hungerRelief: 25, cooldownMs: 1500 },
+  rottenLog: { label: 'Rotten Log', emoji: '🪵', color: '#5C4033', hungerRelief: 40, cooldownMs: 3000 },
+  compost:   { label: 'Compost',    emoji: '🧅', color: '#4A6741', hungerRelief: 55, cooldownMs: 5000 },
 } as const
 
 export const FOOD_TYPE_KEYS = Object.keys(FOOD_TYPES) as FoodType[]
@@ -62,12 +60,44 @@ export const FOOD_TYPE_KEYS = Object.keys(FOOD_TYPES) as FoodType[]
 export const MIST = {
   thirstRelief: 25,
   cooldownMs: 500,
+  hitRadius: 250,
 } as const
 
 export const POKE = {
   cooldownMs: 800,
   annoyanceThreshold: 5,
   annoyanceWindow: 5000,
+} as const
+
+export const FIREFLY = {
+  count: 8,
+  radius: 0.02,
+  pulseSpeed: 3,
+  pulseAmount: 0.4,
+  catchScreenRadius: 60,
+  bobSpeed: 1.2,
+  bobAmount: 0.3,
+  driftSpeed: 0.3,
+  driftRadius: 0.5,
+  respawnDelay: 5,
+  fadeSpeed: 3,
+  color: { normal: '#ff9944', dark: '#44ddbb' },
+  spawnBounds: {
+    x: [-3, 3] as [number, number],
+    y: [0.3, 2.2] as [number, number],
+    z: [-3, 1] as [number, number],
+  },
+} as const
+
+export const JAR = {
+  boredomReliefPerFirefly: 4,
+  boredomReliefCap: 60,
+  floatSpeed: 0.04,
+  floatTimeout: 3,
+  hitRadius: 0.6,
+  dragZ: 2.5,
+  cooldownMs: 1000,
+  jarScale: 0.12,
 } as const
 
 export const TTS = {

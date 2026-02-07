@@ -72,7 +72,6 @@ const SKY_COLORS = {
 
 const FOG_DENSITY   = { normal: 0.02, dark: 0.04 }
 const GROUND_COLORS = { normal: new THREE.Color('#2d5a27'), dark: new THREE.Color('#1a3028') }
-const SPARKLE_COLOR = { normal: '#ffeb3b', dark: '#40eebb' }
 const SMOKE_COLOR   = { normal: '#558855', dark: '#2a4838' }
 const SMOKE_OPACITY = { normal: 0.15, dark: 0.25 }
 
@@ -334,7 +333,6 @@ export default function Forest() {
         ))}
       </Clouds>
 
-      <Sparkles count={80} size={4} scale={[8, 4, 8]} position={[0, 1, 0]} speed={0.4} color={SPARKLE_COLOR[mode]} opacity={0.8} />
       <Sparkles count={40} size={12} scale={[10, 0.8, 10]} position={[0, -0.1, 0]} speed={0.15} color={SMOKE_COLOR[mode]} opacity={SMOKE_OPACITY[mode]} noise={2} />
 
       {DECO_MUSHROOMS.map((props, i) => (

@@ -4,6 +4,9 @@ import * as THREE from 'three'
 import Mushroom from './Mushroom'
 import FoodProjectile from './FoodProjectile'
 import TargetReticle from './TargetReticle'
+import JarProjectile from './JarProjectile'
+import GiftIndicator from './GiftIndicator'
+import Fireflies from './Fireflies'
 import Forest from './Forest'
 import { useGameLoop } from '../hooks/useGameLoop'
 import { useMushroomStore } from '../stores/mushroomStore'
@@ -54,6 +57,9 @@ export default function Scene() {
       <Mushroom />
       <TargetReticle />
       <FoodProjectile />
+      <JarProjectile />
+      <GiftIndicator />
+      <Fireflies />
       <Forest />
     </>
   )

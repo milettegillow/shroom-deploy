@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { FoodType, ThrowRequest } from '../types'
-import { THROW } from '../constants'
+import { THROW, FOOD_TYPES } from '../constants'
 
 let samples: { x: number; y: number; t: number }[] = []
 
@@ -22,6 +22,8 @@ function clampY(y: number) {
   return Math.max(y, window.innerHeight * THROW.dragCeiling)
 }
 
+type CooldownMap = Record<string, boolean>
+
 interface FeedingState {
   isDragging: boolean
   dragFoodType: FoodType | null
@@ -29,13 +31,13 @@ interface FeedingState {
   dragY: number
   throwRequest: ThrowRequest | null
   projectileActive: boolean
-  coolingDown: boolean
+  cooldowns: CooldownMap
   startDrag: (foodType: FoodType, x: number, y: number) => void
   updateDrag: (x: number, y: number) => void
   endDrag: (x: number, y: number) => void
   cancelDrag: () => void
   consumeThrowRequest: () => ThrowRequest | null
-  recordHit: () => void
+  recordHit: (foodType: FoodType) => void
   recordMiss: () => void
 }
 
@@ -46,10 +48,10 @@ export const useFeedingStore = create<FeedingState>()((set, get) => ({
   dragY: 0,
   throwRequest: null,
   projectileActive: false,
-  coolingDown: false,
+  cooldowns: {} as CooldownMap,
 
   startDrag: (foodType, x, y) => {
-    if (get().projectileActive || get().coolingDown) return
+    if (get().projectileActive || get().cooldowns[foodType]) return
     samples = [{ x, y, t: performance.now() }]
     set({ isDragging: true, dragFoodType: foodType, dragX: x, dragY: y })
   },
@@ -85,9 +87,12 @@ export const useFeedingStore = create<FeedingState>()((set, get) => ({
     return req
   },
 
-  recordHit: () => {
-    set({ projectileActive: false, coolingDown: true })
-    setTimeout(() => set({ coolingDown: false }), THROW.cooldownMs)
+  recordHit: (foodType) => {
+    set({ projectileActive: false, cooldowns: { ...get().cooldowns, [foodType]: true } })
+    setTimeout(() => {
+      const { [foodType]: _, ...rest } = get().cooldowns
+      set({ cooldowns: rest })
+    }, FOOD_TYPES[foodType].cooldownMs)
   },
 
   recordMiss: () => set({ projectileActive: false }),
