@@ -3,13 +3,10 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useFeedingStore } from '../stores/feedingStore'
 import { THROW } from '../constants'
+import { lerpOpacity } from '../utils/helpers'
 
 const WHITE = new THREE.Color('#ffffff')
 const SEGS = 48
-
-function lerpOpacity(mat: THREE.MeshBasicMaterial, target: number) {
-  mat.opacity += (target - mat.opacity) * 0.15
-}
 
 export default function TargetReticle() {
   const ringRef = useRef<THREE.Mesh>(null)

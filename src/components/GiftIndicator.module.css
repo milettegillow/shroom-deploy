@@ -1,0 +1,13 @@
+.htmlWrapper {
+  pointer-events: none;
+}
+
+.dropLabel {
+  opacity: 0;
+  font-size: var(--fs-sm);
+  font-family: var(--font-family);
+  color: rgba(255, 220, 130, 0.95);
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.3s;
+}

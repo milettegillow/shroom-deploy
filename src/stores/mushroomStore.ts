@@ -87,7 +87,7 @@ export const useMushroomStore = create<MushroomState>()(
       try {
         response = await chat({
           messages: history,
-          systemPrompt: buildSystemPrompt({ hunger, boredom, evolution, darkFeedCount: 0 }),
+          systemPrompt: buildSystemPrompt({ hunger, boredom, evolution }),
         })
       } catch {
         response = "Hmm, my thoughts feel fuzzy right now... say that again?"

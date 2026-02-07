@@ -1,5 +1,7 @@
 import type { FoodType } from './types'
 
+export const LERP = 0.04
+
 export const STATS = {
   fillTime: 15,
   hungerRate: 100 / 15,
@@ -42,7 +44,7 @@ export const THROW = {
   foodScale: 0.18,
   offscreenY: -4,
   maxFlight: 3,
-  mouthPos: [0, 0.12, 0.3] as [number, number, number],
+  mouthPos: [0, 0.12, 0.3],
   velocityWindow: 80,
   dragCeiling: 0.75,
   dragZ: 2.5,
@@ -83,9 +85,9 @@ export const FIREFLY = {
   fadeSpeed: 3,
   color: { normal: '#ffe4b5', dark: '#44ddbb' },
   spawnBounds: {
-    x: [-3, 3] as [number, number],
-    y: [0.3, 2.2] as [number, number],
-    z: [-3, 1] as [number, number],
+    x: [-3, 3],
+    y: [0.3, 2.2],
+    z: [-3, 1],
   },
 } as const
 

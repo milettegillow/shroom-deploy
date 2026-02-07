@@ -7,10 +7,10 @@
   bottom: -16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: var(--fs-xs);
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-family);
 }
 
 .button {
@@ -39,7 +39,7 @@
 }
 
 .emoji {
-  font-size: 20px;
+  font-size: var(--fs-emoji);
   line-height: 1;
 }
 
@@ -66,7 +66,7 @@
   position: fixed;
   pointer-events: none;
   z-index: 1000;
-  font-size: 48px;
+  font-size: var(--fs-display);
   line-height: 1;
   transform: translate(-50%, -50%) scaleX(-1);
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));

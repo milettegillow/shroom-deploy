@@ -1,0 +1,17 @@
+.htmlWrapper {
+  pointer-events: none;
+}
+
+.badge {
+  background: rgba(255, 153, 68, 0.95);
+  color: #2a1800;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  font-family: var(--font-family);
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

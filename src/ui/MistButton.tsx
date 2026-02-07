@@ -2,9 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { MIST } from '../constants'
+import classNames from 'classnames'
 import styles from './MistButton.module.css'
-
-const cx = (...args: (string | false | undefined)[]) => args.filter(Boolean).join(' ')
 
 interface MistParticle {
   id: number
@@ -21,9 +20,8 @@ interface HitSplash {
   y: number
 }
 
-let nextId = 0
-
 export default function MistButton() {
+  const nextIdRef = useRef(0)
   const [active, setActive] = useState(false)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const [particles, setParticles] = useState<MistParticle[]>([])
@@ -67,7 +65,7 @@ export default function MistButton() {
     const newParticles: MistParticle[] = [
       // Misty blobs
       ...Array.from({ length: 10 }, () => ({
-        id: nextId++,
+        id: nextIdRef.current++,
         x: e.clientX + (Math.random() - 0.5) * 180,
         y: e.clientY - 20 - Math.random() * 40,
         size: 14 + Math.random() * 20,
@@ -76,7 +74,7 @@ export default function MistButton() {
       })),
       // Smaller solid droplets
       ...Array.from({ length: 10 }, () => ({
-        id: nextId++,
+        id: nextIdRef.current++,
         x: e.clientX + (Math.random() - 0.5) * 140,
         y: e.clientY - 10 - Math.random() * 30,
         size: 4 + Math.random() * 6,
@@ -93,7 +91,7 @@ export default function MistButton() {
     if (hit) {
       setTimeout(() => {
         useMushroomStore.getState().mist()
-        const splashId = nextId++
+        const splashId = nextIdRef.current++
         setSplashes((prev) => [...prev, { id: splashId, x: centerX, y: centerY }])
         setTimeout(() => {
           setSplashes((prev) => prev.filter((s) => s.id !== splashId))
@@ -106,7 +104,7 @@ export default function MistButton() {
     <>
       <div className={styles.wrapper}>
         <div
-          className={cx(styles.button, active && styles.active, needsMist && styles.shake)}
+          className={classNames(styles.button, active && styles.active, needsMist && styles.shake)}
           onClick={handleToggle}
         >
           <span className={styles.emoji}>🚿</span>

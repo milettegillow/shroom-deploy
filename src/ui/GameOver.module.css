@@ -16,9 +16,9 @@
 }
 
 .title {
-  font-size: 48px;
-  font-weight: 800;
-  font-family: system-ui, sans-serif;
+  font-size: var(--fs-display);
+  font-weight: var(--fw-heavy);
+  font-family: var(--font-family);
   color: #c0392b;
   text-transform: uppercase;
   letter-spacing: 4px;
@@ -34,14 +34,14 @@
 }
 
 .stat {
-  font-size: 18px;
-  font-family: system-ui, sans-serif;
+  font-size: var(--fs-xl);
+  font-family: var(--font-family);
   color: rgba(255, 255, 255, 0.8);
 }
 
 .time {
   color: #fff;
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .best {
@@ -50,13 +50,13 @@
 
 .restartBtn {
   padding: 14px 32px;
-  font-size: 18px;
-  font-weight: 600;
-  font-family: system-ui, sans-serif;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  font-family: var(--font-family);
   color: #fff;
   background: rgba(45, 90, 39, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: transform 0.15s, background 0.2s;
 }

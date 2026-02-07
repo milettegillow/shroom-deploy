@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { useMushroomBehavior } from '../hooks/useMushroomBehavior'
@@ -9,26 +10,35 @@ import MistButton from './MistButton'
 import FireflyJar from './FireflyJar'
 import GameOver from './GameOver'
 import styles from './HUD.module.css'
+import { Meter } from '../config'
 
 function hungerMeter(hunger: number) {
   const fullness = 100 - Math.round(hunger)
-  const color = fullness <= 30 ? '#e05555' : fullness <= 60 ? '#e0a030' : '#55b060'
+  const color = fullness <= Meter.thresholds.low ? Meter.colors.hunger.low : fullness <= Meter.thresholds.mid ? Meter.colors.hunger.mid : Meter.colors.hunger.high
   const label = fullness > 70 ? 'Full' : fullness > 40 ? 'Hungry' : 'Starving!'
   return { value: fullness, color, label }
 }
 
 function thirstMeter(thirst: number) {
   const hydration = 100 - Math.round(thirst)
-  const color = hydration <= 30 ? '#5588cc' : hydration <= 60 ? '#4498dd' : '#33aaee'
+  const color = hydration <= Meter.thresholds.low ? Meter.colors.thirst.low : hydration <= Meter.thresholds.mid ? Meter.colors.thirst.mid : Meter.colors.thirst.high
   const label = hydration > 70 ? 'Hydrated' : hydration > 40 ? 'Thirsty' : 'Parched!'
   return { value: hydration, color, label }
 }
 
 function boredomMeter(boredom: number) {
   const entertainment = 100 - Math.round(boredom)
-  const color = entertainment <= 30 ? '#cc6699' : entertainment <= 60 ? '#cc9944' : '#55b060'
+  const color = entertainment <= Meter.thresholds.low ? Meter.colors.boredom.low : entertainment <= Meter.thresholds.mid ? Meter.colors.boredom.mid : Meter.colors.boredom.high
   const label = entertainment > 70 ? 'Happy' : entertainment > 40 ? 'Bored' : 'Restless!'
   return { value: entertainment, color, label }
+}
+
+function useMeterStyle(ref: React.RefObject<HTMLDivElement | null>, value: number, color: string) {
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.style.width = `${value}%`
+    ref.current.style.background = color
+  }, [ref, value, color])
 }
 
 export default function HUD() {
@@ -44,6 +54,14 @@ export default function HUD() {
   const mist = thirstMeter(thirst)
   const play = boredomMeter(boredom)
 
+  const feedRef = useRef<HTMLDivElement>(null)
+  const mistRef = useRef<HTMLDivElement>(null)
+  const playRef = useRef<HTMLDivElement>(null)
+
+  useMeterStyle(feedRef, feed.value, feed.color)
+  useMeterStyle(mistRef, mist.value, mist.color)
+  useMeterStyle(playRef, play.value, play.color)
+
   return (
     <div className={styles.overlay}>
       {phase === 'playing' && (
@@ -54,21 +72,21 @@ export default function HUD() {
               <div className={styles.statRow}>
                 <span className={styles.statLabel}>Feed</span>
                 <div className={styles.meter}>
-                  <div className={styles.meterFill} style={{ width: `${feed.value}%`, background: feed.color }} />
+                  <div ref={feedRef} className={styles.meterFill} />
                   <span className={styles.meterText}>{feed.label}</span>
                 </div>
               </div>
               <div className={styles.statRow}>
                 <span className={styles.statLabel}>Mist</span>
                 <div className={styles.meter}>
-                  <div className={styles.meterFill} style={{ width: `${mist.value}%`, background: mist.color }} />
+                  <div ref={mistRef} className={styles.meterFill} />
                   <span className={styles.meterText}>{mist.label}</span>
                 </div>
               </div>
               <div className={styles.statRow}>
                 <span className={styles.statLabel}>Play</span>
                 <div className={styles.meter}>
-                  <div className={styles.meterFill} style={{ width: `${play.value}%`, background: play.color }} />
+                  <div ref={playRef} className={styles.meterFill} />
                   <span className={styles.meterText}>{play.label}</span>
                 </div>
               </div>

@@ -5,16 +5,11 @@ import * as THREE from 'three'
 import { useFireflyStore } from '../stores/fireflyStore'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { THROW, JAR } from '../constants'
+import { screenToWorld } from '../utils/camera'
+import { Jar } from '../config'
+import styles from './JarProjectile.module.css'
 
 const MOUTH = new THREE.Vector3(...THROW.mouthPos)
-
-function screenToWorld(nx: number, ny: number, camera: THREE.Camera, targetZ = 0) {
-  const ndc = new THREE.Vector3(nx * 2 - 1, -(ny * 2 - 1), 0.5)
-  ndc.unproject(camera)
-  const dir = ndc.sub(camera.position).normalize()
-  const t = (targetZ - camera.position.z) / dir.z
-  return camera.position.clone().add(dir.multiplyScalar(t))
-}
 
 interface JarFlight {
   active: boolean
@@ -100,8 +95,8 @@ export default function JarProjectile() {
         <cylinderGeometry args={[0.5, 0.6, 1.2, 12]} />
         <meshStandardMaterial
           ref={glowRef}
-          color="#c8a850"
-          emissive="#ffaa00"
+          color={Jar.colors.body}
+          emissive={Jar.colors.emissive}
           emissiveIntensity={0.5}
           transparent
           opacity={0.7}
@@ -111,24 +106,12 @@ export default function JarProjectile() {
       </mesh>
       <mesh position={[0, 0.7, 0]}>
         <cylinderGeometry args={[0.35, 0.5, 0.2, 12]} />
-        <meshStandardMaterial color="#a08040" roughness={0.3} />
+        <meshStandardMaterial color={Jar.colors.cap} roughness={0.3} />
       </mesh>
-      <pointLight ref={lightRef} color="#ffcc44" intensity={0.4} distance={2} />
+      <pointLight ref={lightRef} color={Jar.colors.light} intensity={0.4} distance={2} />
       {jarCount > 0 && (phase === 'scooping' || phase === 'gifting') && (
-        <Html center position={[0, 1.2, 0]} style={{ pointerEvents: 'none' }}>
-          <div style={{
-            background: 'rgba(255, 153, 68, 0.95)',
-            color: '#2a1800',
-            fontSize: '14px',
-            fontWeight: 700,
-            fontFamily: 'system-ui, sans-serif',
-            width: '22px',
-            height: '22px',
-            borderRadius: '11px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+        <Html center position={[0, 1.2, 0]} className={styles.htmlWrapper}>
+          <div className={styles.badge}>
             {jarCount}
           </div>
         </Html>

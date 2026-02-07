@@ -3,9 +3,9 @@ import { useFrame } from '@react-three/fiber'
 import { Sparkles, Clouds, Cloud } from '@react-three/drei'
 import * as THREE from 'three'
 import { useMushroomStore } from '../stores/mushroomStore'
+import { LERP } from '../constants'
 import type { EvolutionState } from '../types'
-
-const LERP = 0.04
+import { Env } from '../config'
 
 const DECO_MUSHROOMS: { position: [number, number, number]; scale: number }[] = [
   { position: [-2.5, -0.35, -1.5], scale: 0.8 },
@@ -49,36 +49,6 @@ const TREES: { position: [number, number, number]; scale: number; seed: number }
   { position: [-4.0, -0.5, -7.0], scale: 0.5, seed: 6 },
   { position: [6.5, -0.5, -5.0], scale: 0.65, seed: 7 },
 ]
-
-const DECO_COLORS = {
-  normal: { stem: new THREE.Color('#d4c5a9'), cap: new THREE.Color('#8b5e3c') },
-  dark:   { stem: new THREE.Color('#a0a898'), cap: new THREE.Color('#506058') },
-}
-
-const PLANT_COLORS = {
-  normal: { stem: new THREE.Color('#4a8b3f'), bulb: new THREE.Color('#7bff6b') },
-  dark:   { stem: new THREE.Color('#2a5848'), bulb: new THREE.Color('#40eebb') },
-}
-
-const TREE_COLORS = {
-  normal: { trunk: new THREE.Color('#5a3a1a'), canopy: new THREE.Color('#2d6b1e') },
-  dark:   { trunk: new THREE.Color('#3a2818'), canopy: new THREE.Color('#1a3a18') },
-}
-
-const SKY_COLORS = {
-  normal: { top: new THREE.Color('#101830'), mid: new THREE.Color('#1e3058'), bot: new THREE.Color('#2a3850') },
-  dark:   { top: new THREE.Color('#081018'), mid: new THREE.Color('#122030'), bot: new THREE.Color('#1a3040') },
-}
-
-const FOG_DENSITY   = { normal: 0.02, dark: 0.04 }
-const GROUND_COLORS = { normal: new THREE.Color('#2d5a27'), dark: new THREE.Color('#1a3028') }
-const SMOKE_COLOR   = { normal: '#558855', dark: '#2a4838' }
-const SMOKE_OPACITY = { normal: 0.15, dark: 0.25 }
-
-const MOON_OPACITY = { normal: 0.9, dark: 0.3 }
-const MOON_LIGHT_INTENSITY = { normal: 1.0, dark: 0.1 }
-const MOON_COLOR = new THREE.Color('#e8e4d8')
-const MOON_POSITION: [number, number, number] = [4, 5, -6]
 
 type CloudConfig = {
   position: [number, number, number]
@@ -143,34 +113,32 @@ function DecoMushroom({ position, scale, evolution }: {
   const mode = evolution === 'dark' ? 'dark' : 'normal'
 
   useFrame(() => {
-    stemRef.current?.color.lerp(DECO_COLORS[mode].stem, LERP)
-    capRef.current?.color.lerp(DECO_COLORS[mode].cap, LERP)
+    stemRef.current?.color.lerp(Env.decoColors[mode].stem, LERP)
+    capRef.current?.color.lerp(Env.decoColors[mode].cap, LERP)
   })
 
   return (
     <group position={position} scale={scale}>
       <mesh>
         <cylinderGeometry args={[0.08, 0.1, 0.3, 8]} />
-        <meshStandardMaterial ref={stemRef} color="#d4c5a9" />
+        <meshStandardMaterial ref={stemRef} color={Env.decoColors.normal.stem} />
       </mesh>
       <mesh position={[0, 0.13, 0]}>
         <sphereGeometry args={[0.2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshStandardMaterial ref={capRef} color="#8b5e3c" />
+        <meshStandardMaterial ref={capRef} color={Env.decoColors.normal.cap} />
       </mesh>
     </group>
   )
 }
 
-const GLOW_LIGHT_THRESHOLD = 0.5
-
 function GlowPlant({ position, scale = 1, evolution }: {
   position: [number, number, number]; scale?: number; evolution: EvolutionState
 }) {
-  const hasLight = scale >= GLOW_LIGHT_THRESHOLD
+  const hasLight = scale >= Env.glowLightThreshold
   const lightRef = useRef<THREE.PointLight>(null)
   const stemRef = useRef<THREE.MeshStandardMaterial>(null)
   const bulbRef = useRef<THREE.MeshStandardMaterial>(null)
-  const target = evolution === 'dark' ? PLANT_COLORS.dark : PLANT_COLORS.normal
+  const target = evolution === 'dark' ? Env.plantColors.dark : Env.plantColors.normal
 
   useFrame((state) => {
     stemRef.current?.color.lerp(target.stem, LERP)
@@ -188,13 +156,13 @@ function GlowPlant({ position, scale = 1, evolution }: {
     <group position={position} scale={scale}>
       <mesh>
         <cylinderGeometry args={[0.02, 0.03, 0.5, 6]} />
-        <meshStandardMaterial ref={stemRef} color="#4a8b3f" />
+        <meshStandardMaterial ref={stemRef} color={Env.plantColors.normal.stem} />
       </mesh>
       <mesh position={[0, 0.3, 0]}>
         <sphereGeometry args={[0.06, 8, 8]} />
-        <meshStandardMaterial ref={bulbRef} color="#7bff6b" emissive="#7bff6b" emissiveIntensity={hasLight ? 0.5 : 0.8} />
+        <meshStandardMaterial ref={bulbRef} color={Env.plantColors.normal.bulb} emissive={Env.plantColors.normal.bulb} emissiveIntensity={hasLight ? 0.5 : 0.8} />
       </mesh>
-      {hasLight && <pointLight ref={lightRef} position={[0, 0.3, 0]} color="#7bff6b" intensity={0.3} distance={2} />}
+      {hasLight && <pointLight ref={lightRef} position={[0, 0.3, 0]} color={Env.plantColors.normal.bulb} intensity={0.3} distance={2} />}
     </group>
   )
 }
@@ -205,7 +173,7 @@ function Tree({ position, scale, seed, evolution }: {
   const trunkRef = useRef<THREE.MeshStandardMaterial>(null)
   const canopyRef = useRef<THREE.MeshStandardMaterial>(null)
   const canopyTopRef = useRef<THREE.MeshStandardMaterial>(null)
-  const target = evolution === 'dark' ? TREE_COLORS.dark : TREE_COLORS.normal
+  const target = evolution === 'dark' ? Env.treeColors.dark : Env.treeColors.normal
   const trunkHeight = 1.2 + (seed % 3) * 0.3
   const canopyRadius = 0.8 + (seed % 4) * 0.15
   const canopyY = trunkHeight * 0.5 + canopyRadius * 0.4
@@ -220,15 +188,15 @@ function Tree({ position, scale, seed, evolution }: {
     <group position={position} scale={scale}>
       <mesh position={[0, trunkHeight / 2, 0]}>
         <cylinderGeometry args={[0.08, 0.12, trunkHeight, 8]} />
-        <meshStandardMaterial ref={trunkRef} color="#5a3a1a" />
+        <meshStandardMaterial ref={trunkRef} color={Env.treeColors.normal.trunk} />
       </mesh>
       <mesh position={[0, canopyY, 0]}>
         <coneGeometry args={[canopyRadius, canopyRadius * 2, 8]} />
-        <meshStandardMaterial ref={canopyRef} color="#2d6b1e" />
+        <meshStandardMaterial ref={canopyRef} color={Env.treeColors.normal.canopy} />
       </mesh>
       <mesh position={[0, canopyY + canopyRadius * 0.9, 0]}>
         <coneGeometry args={[canopyRadius * 0.7, canopyRadius * 1.5, 8]} />
-        <meshStandardMaterial ref={canopyTopRef} color="#2d6b1e" />
+        <meshStandardMaterial ref={canopyTopRef} color={Env.treeColors.normal.canopy} />
       </mesh>
     </group>
   )
@@ -241,27 +209,27 @@ function Moon({ evolution }: { evolution: EvolutionState }) {
 
   useFrame(() => {
     if (matRef.current) {
-      matRef.current.opacity += (MOON_OPACITY[mode] - matRef.current.opacity) * LERP
+      matRef.current.opacity += (Env.moonOpacity[mode] - matRef.current.opacity) * LERP
     }
     if (lightRef.current) {
-      lightRef.current.intensity += (MOON_LIGHT_INTENSITY[mode] - lightRef.current.intensity) * LERP
+      lightRef.current.intensity += (Env.moonLightIntensity[mode] - lightRef.current.intensity) * LERP
     }
   })
 
   return (
-    <group position={MOON_POSITION}>
+    <group position={Env.moonPosition}>
       <mesh renderOrder={999}>
-        <sphereGeometry args={[1.5, 16, 16]} />
+        <sphereGeometry args={[Env.moonRadius, 16, 16]} />
         <meshBasicMaterial
           ref={matRef}
-          color={MOON_COLOR}
+          color={Env.moonColor}
           transparent
           opacity={0.9}
           depthTest={false}
           fog={false}
         />
       </mesh>
-      <pointLight ref={lightRef} color="#c8c4b8" intensity={0.6} distance={30} />
+      <pointLight ref={lightRef} color={Env.moonLightColor} intensity={0.6} distance={30} />
     </group>
   )
 }
@@ -271,32 +239,32 @@ export default function Forest() {
   const groundRef = useRef<THREE.MeshStandardMaterial>(null)
   const evolution = useMushroomStore((s) => s.evolution)
 
-  const skyUniforms = useRef({
-    uTopColor: { value: SKY_COLORS.normal.top.clone() },
-    uMidColor: { value: SKY_COLORS.normal.mid.clone() },
-    uBotColor: { value: SKY_COLORS.normal.bot.clone() },
-  })
+  const skyUniforms = useMemo(() => ({
+    uTopColor: { value: Env.skyColors.normal.top.clone() },
+    uMidColor: { value: Env.skyColors.normal.mid.clone() },
+    uBotColor: { value: Env.skyColors.normal.bot.clone() },
+  }), [])
 
   const skyMaterial = useMemo(
     () => new THREE.ShaderMaterial({
       vertexShader: skyVertexShader,
       fragmentShader: skyFragmentShader,
-      uniforms: skyUniforms.current,
+      uniforms: skyUniforms,
       side: THREE.BackSide,
       depthWrite: false,
     }),
-    [],
+    [skyUniforms],
   )
 
   useFrame(() => {
     const mode = evolution === 'dark' ? 'dark' : 'normal'
 
-    if (fogRef.current) fogRef.current.density += (FOG_DENSITY[mode] - fogRef.current.density) * LERP
-    groundRef.current?.color.lerp(GROUND_COLORS[mode], LERP)
+    if (fogRef.current) fogRef.current.density += (Env.fogDensity[mode] - fogRef.current.density) * LERP
+    groundRef.current?.color.lerp(Env.groundColors[mode], LERP)
 
-    skyUniforms.current.uTopColor.value.lerp(SKY_COLORS[mode].top, LERP)
-    skyUniforms.current.uMidColor.value.lerp(SKY_COLORS[mode].mid, LERP)
-    skyUniforms.current.uBotColor.value.lerp(SKY_COLORS[mode].bot, LERP)
+    skyUniforms.uTopColor.value.lerp(Env.skyColors[mode].top, LERP)
+    skyUniforms.uMidColor.value.lerp(Env.skyColors[mode].mid, LERP)
+    skyUniforms.uBotColor.value.lerp(Env.skyColors[mode].bot, LERP)
   })
 
   const isDark = evolution === 'dark'
@@ -304,17 +272,17 @@ export default function Forest() {
 
   return (
     <group>
-      <fogExp2 ref={fogRef} attach="fog" args={['#0a1a0a', 0.02]} />
+      <fogExp2 ref={fogRef} attach="fog" args={[Env.fogColor, Env.fogDensity.normal]} />
 
       <mesh material={skyMaterial}>
-        <sphereGeometry args={[50, 32, 16]} />
+        <sphereGeometry args={[Env.skyRadius, 32, 16]} />
       </mesh>
 
       <Moon evolution={evolution} />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <circleGeometry args={[10, 64]} />
-        <meshStandardMaterial ref={groundRef} color="#2d5a27" />
+        <circleGeometry args={[Env.groundRadius, 64]} />
+        <meshStandardMaterial ref={groundRef} color={Env.groundColors.normal} />
       </mesh>
 
       <Clouds>
@@ -333,7 +301,7 @@ export default function Forest() {
         ))}
       </Clouds>
 
-      <Sparkles count={40} size={12} scale={[10, 0.8, 10]} position={[0, -0.1, 0]} speed={0.15} color={SMOKE_COLOR[mode]} opacity={SMOKE_OPACITY[mode]} noise={2} />
+      <Sparkles count={Env.sparkles.count} size={Env.sparkles.size} scale={Env.sparkles.scale} position={[0, -0.1, 0]} speed={Env.sparkles.speed} color={Env.smokeColor[mode]} opacity={Env.smokeOpacity[mode]} noise={Env.sparkles.noise} />
 
       {DECO_MUSHROOMS.map((props, i) => (
         <DecoMushroom key={i} {...props} evolution={evolution} />

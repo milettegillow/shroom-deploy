@@ -1,3 +1,32 @@
+:root {
+  /* Font */
+  --font-family: system-ui, sans-serif;
+
+  /* Font sizes */
+  --fs-2xs: 8px;
+  --fs-xs: 9px;
+  --fs-sm: 10px;
+  --fs-hint: 11px;
+  --fs-tag: 13px;
+  --fs-base: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-emoji: 20px;
+  --fs-display: 48px;
+
+  /* Font weights */
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-heavy: 800;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-round: 50%;
+}
+
 * {
   margin: 0;
   padding: 0;

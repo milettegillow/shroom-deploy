@@ -1,20 +1,13 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useFeedingStore } from '../stores/feedingStore'
 import { useMushroomStore } from '../stores/mushroomStore'
 import { THROW, FOOD_TYPES, FOOD_TYPE_KEYS } from '../constants'
+import { screenToWorld } from '../utils/camera'
 import type { FoodType, ThrowRequest } from '../types'
 
 const MOUTH = new THREE.Vector3(...THROW.mouthPos)
-
-function screenToWorld(nx: number, ny: number, camera: THREE.Camera, targetZ = 0) {
-  const ndc = new THREE.Vector3(nx * 2 - 1, -(ny * 2 - 1), 0.5)
-  ndc.unproject(camera)
-  const dir = ndc.sub(camera.position).normalize()
-  const t = (targetZ - camera.position.z) / dir.z
-  return camera.position.clone().add(dir.multiplyScalar(t))
-}
 
 const GEOMETRIES: Record<FoodType, React.JSX.Element> = {
   deadLeaf:  <sphereGeometry args={[1, 8, 4]} />,
@@ -33,7 +26,7 @@ interface Projectile {
 
 export default function FoodProjectile() {
   const groupRef = useRef<THREE.Group>(null)
-  const meshes = useRef<Record<string, THREE.Mesh | null>>({})
+  const meshes = useRef<Record<FoodType, THREE.Mesh | null>>({} as Record<FoodType, THREE.Mesh | null>)
   const proj = useRef<Projectile>({
     active: false, foodType: 'deadLeaf',
     pos: new THREE.Vector3(), vel: new THREE.Vector3(), elapsed: 0,

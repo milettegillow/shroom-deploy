@@ -1,8 +1,8 @@
-import { useEffect, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useFireflyStore } from '../stores/fireflyStore'
+import classNames from 'classnames'
+import { useDragListeners } from '../hooks/useDragListeners'
 import styles from './FireflyJar.module.css'
-
-const cx = (...args: (string | false | undefined)[]) => args.filter(Boolean).join(' ')
 
 export default function FireflyJar() {
   const { phase, jarCount, giftActive, coolingDown } = useFireflyStore()
@@ -29,15 +29,7 @@ export default function FireflyJar() {
     useFireflyStore.getState().endDrag(e.clientX, e.clientY)
   }, [])
 
-  useEffect(() => {
-    if (!isDragging) return
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerup', onPointerUp)
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
-    }
-  }, [isDragging, onPointerMove, onPointerUp])
+  useDragListeners(isDragging, onPointerMove, onPointerUp)
 
   const glowStyle = hasFireflies ? {
     boxShadow: `0 0 ${glowSize}px rgba(255, 180, 60, ${glowAlpha}), 0 0 ${outerSize}px rgba(255, 140, 30, ${glowAlpha * 0.5}), inset 0 0 12px rgba(255, 200, 80, ${bgAlpha})`,
@@ -49,7 +41,7 @@ export default function FireflyJar() {
     <>
       <div className={styles.wrapper}>
         <div
-          className={cx(
+          className={classNames(
             styles.jar,
             disabled && styles.empty,
             isDragging && styles.dragging,

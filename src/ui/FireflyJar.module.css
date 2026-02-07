@@ -7,10 +7,10 @@
   bottom: -16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 9px;
+  font-size: var(--fs-xs);
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-family);
 }
 
 .jar {
@@ -47,7 +47,7 @@
 }
 
 .emoji {
-  font-size: 20px;
+  font-size: var(--fs-emoji);
   line-height: 1;
 }
 
@@ -57,12 +57,12 @@
   right: -4px;
   min-width: 18px;
   height: 18px;
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   background: rgba(255, 153, 68, 0.9);
   color: #2a1800;
-  font-size: 10px;
-  font-family: system-ui, sans-serif;
-  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-family: var(--font-family);
+  font-weight: var(--fw-bold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -85,8 +85,8 @@
   right: 12px;
   pointer-events: none;
   z-index: 999;
-  font-size: 11px;
-  font-family: system-ui, sans-serif;
+  font-size: var(--fs-hint);
+  font-family: var(--font-family);
   color: rgba(255, 200, 80, 0.4);
   transform: translateY(-100%);
   padding-bottom: 4px;
@@ -99,12 +99,12 @@
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 999;
-  font-size: 13px;
-  font-family: system-ui, sans-serif;
+  font-size: var(--fs-tag);
+  font-family: var(--font-family);
   color: rgba(255, 220, 100, 0.85);
   background: rgba(30, 25, 15, 0.7);
   padding: 6px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   animation: hintFadeIn 0.2s ease-out;
 }

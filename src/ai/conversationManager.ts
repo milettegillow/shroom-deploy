@@ -1,10 +1,7 @@
 import { BEHAVIOR } from '../constants'
 import { HUNGER_MESSAGES, THIRST_MESSAGES, BOREDOM_MESSAGES, APPROACHING_IRREVERSIBLE } from './messages'
+import { pickRandom } from '../utils/helpers'
 import type { EvolutionState } from '../types'
-
-function pickRandom(arr: string[]) {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
 
 type Mode = 'normal' | 'dark'
 

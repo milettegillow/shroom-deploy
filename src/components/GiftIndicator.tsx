@@ -4,13 +4,12 @@ import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { useFireflyStore } from '../stores/fireflyStore'
 import { THROW } from '../constants'
+import { lerpOpacity } from '../utils/helpers'
+import styles from './GiftIndicator.module.css'
 
 const WARM = new THREE.Color('#ffcc66')
 const SEGS = 32
-
-function lerpOpacity(mat: THREE.MeshBasicMaterial, target: number) {
-  mat.opacity += (target - mat.opacity) * 0.08
-}
+const GIFT_LERP_RATE = 0.08
 
 export default function GiftIndicator() {
   const ringRef = useRef<THREE.Mesh>(null)
@@ -24,8 +23,8 @@ export default function GiftIndicator() {
 
     const ringTarget = show ? 0.45 : 0
     const glowTarget = show ? 0.15 : 0
-    lerpOpacity(ringRef.current.material as THREE.MeshBasicMaterial, ringTarget)
-    lerpOpacity(glowRef.current.material as THREE.MeshBasicMaterial, glowTarget)
+    lerpOpacity(ringRef.current.material as THREE.MeshBasicMaterial, ringTarget, GIFT_LERP_RATE)
+    lerpOpacity(glowRef.current.material as THREE.MeshBasicMaterial, glowTarget, GIFT_LERP_RATE)
 
     if (show) {
       const pulse = 1 + Math.sin(clock.elapsedTime * 2) * 0.04
@@ -53,16 +52,8 @@ export default function GiftIndicator() {
         <ringGeometry args={[r - 0.015, r, SEGS]} />
         {ringMat}
       </mesh>
-      <Html center position={[0, r + 0.15, 0]} style={{ pointerEvents: 'none' }}>
-        <div ref={htmlRef} style={{
-          opacity: 0,
-          fontSize: '10px',
-          fontFamily: 'system-ui, sans-serif',
-          color: 'rgba(255, 220, 130, 0.95)',
-          whiteSpace: 'nowrap',
-          textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-          transition: 'opacity 0.3s',
-        }}>
+      <Html center position={[0, r + 0.15, 0]} className={styles.htmlWrapper}>
+        <div ref={htmlRef} className={styles.dropLabel}>
           drop here
         </div>
       </Html>
