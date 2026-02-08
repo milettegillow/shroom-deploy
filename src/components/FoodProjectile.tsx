@@ -36,8 +36,8 @@ export default function FoodProjectile() {
     start: new THREE.Vector3(), elapsed: 0,
   })
   const { camera } = useThree()
-  const barkGltf = useGLTF('/gh-assets/bark.glb')
-  const leafGltf = useGLTF('/gh-assets/leaf.glb')
+  const barkGltf = useGLTF('https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/bark.glb')
+  const leafGltf = useGLTF('https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/leaf.glb')
   const logGltf = useGLTF('/log.glb')
 
   function showOnly(type: FoodType | null) {

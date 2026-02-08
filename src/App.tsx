@@ -7,8 +7,8 @@ import HUD from "./ui/HUD";
 // Kick off all GLB downloads immediately so they load during the title screen
 useGLTF.preload("/Mushroom-cute.glb");
 useGLTF.preload("/Mushroom-evil.glb");
-useGLTF.preload("/gh-assets/bark.glb");
-useGLTF.preload("/gh-assets/leaf.glb");
+useGLTF.preload("https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/bark.glb");
+useGLTF.preload("https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/leaf.glb");
 useGLTF.preload("/log.glb");
 useGLTF.preload("/splash.glb");
 useGLTF.preload("/jar.glb");
