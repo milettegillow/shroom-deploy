@@ -1,4 +1,5 @@
 import { AI } from '../constants'
+import { getDiscordToken } from '../multiplayer/playroom'
 import type { Message } from '../types'
 
 // In dev, Vite proxies /api to localhost:3001.
@@ -6,9 +7,13 @@ import type { Message } from '../types'
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export async function chat(req: { messages: Message[]; systemPrompt: string }): Promise<string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const token = getDiscordToken()
+  if (token) headers['Authorization'] = `Discord ${token}`
+
   const res = await fetch(`${API_BASE}/api/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ model: AI.model, max_tokens: AI.maxTokens, system: req.systemPrompt, messages: req.messages }),
   })
   if (!res.ok) throw new Error(`AI request failed: ${res.status} ${await res.text()}`)

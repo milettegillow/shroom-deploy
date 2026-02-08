@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { chat } from '../ai/aiService'
 import { buildSystemPrompt } from '../ai/prompts'
-import { STATS, MIST, JAR, FOOD_TYPES, STAGES } from '../constants'
+import { STATS, MIST, JAR, FOOD_TYPES, STAGES, AI } from '../constants'
 import { DEV } from '../devMode'
 import { usePlayerStore } from './playerStore'
 import type { EvolutionState, FoodType, Message, AgeStage } from '../types'
@@ -20,6 +20,7 @@ interface MushroomState {
   lastMistTime: number
   lastPokeTime: number
   lastGiftTime: number
+  lastChatTime: number
   lastGiftCount: number
   stage: AgeStage
   totalFeeds: number
@@ -46,6 +47,7 @@ const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'giveFireflies' | 
   lastFeedTime: 0,
   lastMistTime: 0,
   lastPokeTime: 0,
+  lastChatTime: 0,
   lastGiftTime: 0,
   lastGiftCount: 0,
   stage: 1 as AgeStage,
@@ -105,15 +107,22 @@ export const useMushroomStore = create<MushroomState>()(
     }),
 
     sendMessage: async (text) => {
-      const { conversationHistory, hunger, boredom, evolution } = get()
+      const { conversationHistory, hunger, boredom, evolution, lastChatTime } = get()
+
+      // Rate limit: enforce cooldown between messages
+      if (Date.now() - lastChatTime < AI.chatCooldown) return
+
       const { playerName } = usePlayerStore.getState()
       const history = [...conversationHistory, { role: 'user' as const, content: text }]
-      set({ conversationHistory: history, isConversing: true })
+      set({ conversationHistory: history, isConversing: true, lastChatTime: Date.now() })
+
+      // Prune history for API call — only send last N messages
+      const apiHistory = history.slice(-AI.maxHistory)
 
       let response: string
       try {
         response = await chat({
-          messages: history,
+          messages: apiHistory,
           systemPrompt: buildSystemPrompt({ hunger, boredom, evolution, playerName }),
         })
       } catch {

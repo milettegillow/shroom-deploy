@@ -28,3 +28,11 @@ export async function initPlayroom() {
 export function getMyProfile(): { name: string; photo: string } {
   return Playroom.me().getProfile()
 }
+
+export function getDiscordToken(): string | null {
+  try {
+    return Playroom.getDiscordAccessToken() || null
+  } catch {
+    return null
+  }
+}
