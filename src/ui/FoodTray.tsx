@@ -30,7 +30,8 @@ export default function FoodTray() {
   return (
     <>
       {availableFoods.map((type, i) => {
-        const itemDisabled = projectileActive || !!cooldowns[type]
+        const onCooldown = !!cooldowns[type]
+        const itemDisabled = projectileActive || onCooldown
         const isNew = stage > 1 && paused && !prevFoods.includes(type)
         return (
         <div
@@ -40,6 +41,7 @@ export default function FoodTray() {
           onPointerDown={(e) => onPointerDown(type, e)}
         >
           {isNew && <span className={styles.newBadge}>NEW</span>}
+          {onCooldown && <span className={styles.cooldownIcon}>⏳</span>}
           <span className={styles.emoji}>{FOOD_TYPES[type].emoji}</span>
           <span className={styles.label}>{FOOD_TYPES[type].label}</span>
           <span className={styles.tooltip}>+{FOOD_TYPES[type].hungerRelief} hunger</span>

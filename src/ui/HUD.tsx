@@ -106,7 +106,7 @@ export default function HUD() {
               {stage >= 3 && <div data-tutorial="firefly-jar"><FireflyJar /></div>}
             </div>
           </div>
-          {stage >= 3 && <div data-tutorial="chat-box" data-hud-action><ChatBox /></div>}
+          <div data-tutorial="chat-box" data-hud-action><ChatBox /></div>
         </>
       )}
       {phase === 'gameOver' && <GameOver />}

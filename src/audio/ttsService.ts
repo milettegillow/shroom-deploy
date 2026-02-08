@@ -32,6 +32,8 @@ class TTSService {
     }, 50)
   }
 
+  isSpeaking() { return this.synth?.speaking ?? false }
+
   stop() { this.synth?.cancel() }
 }
 

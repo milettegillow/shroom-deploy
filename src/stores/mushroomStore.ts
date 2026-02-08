@@ -1,8 +1,12 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { chat } from '../ai/aiService'
-import { buildSystemPrompt } from '../ai/prompts'
+import { buildSystemPrompt, buildInitiationPrompt, buildReactionPrompt } from '../ai/prompts'
+import type { InitiationTrigger, ReactionEvent } from '../ai/prompts'
+import { HUNGER_MESSAGES, THIRST_MESSAGES, BOREDOM_MESSAGES } from '../ai/messages'
+import { pickRandom } from '../utils/helpers'
 import { STATS, MIST, JAR, FOOD_TYPES, STAGES, AI } from '../constants'
+import { tts } from '../audio/ttsService'
 import { DEV } from '../devMode'
 import { usePlayerStore } from './playerStore'
 import type { EvolutionState, FoodType, Message, AgeStage } from '../types'
@@ -16,6 +20,7 @@ interface MushroomState {
   isConversing: boolean
   lastMushroomMessage: string | null
   lastMushroomMessageId: number
+  lastMessageTime: number
   lastFeedTime: number
   lastMistTime: number
   lastPokeTime: number
@@ -31,11 +36,13 @@ interface MushroomState {
   giveFireflies: (count: number) => void
   sendMessage: (text: string) => Promise<void>
   receiveMessage: (text: string) => void
+  generateMushroomMessage: (trigger: InitiationTrigger) => Promise<void>
+  reactToEvent: (event: ReactionEvent) => Promise<void>
   tick: (dt: number) => void
   reset: () => void
 }
 
-const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'giveFireflies' | 'sendMessage' | 'receiveMessage' | 'tick' | 'reset'> = {
+const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'giveFireflies' | 'sendMessage' | 'receiveMessage' | 'generateMushroomMessage' | 'reactToEvent' | 'tick' | 'reset'> = {
   hunger: 0,
   boredom: 0,
   thirst: 0,
@@ -44,6 +51,7 @@ const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'giveFireflies' | 
   isConversing: false,
   lastMushroomMessage: null,
   lastMushroomMessageId: 0,
+  lastMessageTime: 0,
   lastFeedTime: 0,
   lastMistTime: 0,
   lastPokeTime: 0,
@@ -66,6 +74,25 @@ function resolveEvolution(hunger: number, current: EvolutionState): EvolutionSta
   if (hunger >= STATS.darkThreshold) return 'dark'
   if (current === 'dark') return 'normal'
   return current
+}
+
+function pushAssistantMessage(
+  set: (fn: (s: MushroomState) => Partial<MushroomState>) => void,
+  text: string,
+  extras?: Partial<Pick<MushroomState, 'isConversing' | 'boredom'>>,
+) {
+  const clean = text.replace(/\*/g, '')
+  set((s) => ({
+    conversationHistory: [...s.conversationHistory, { role: 'assistant' as const, content: clean }],
+    lastMushroomMessage: clean,
+    lastMushroomMessageId: s.lastMushroomMessageId + 1,
+    lastMessageTime: Date.now(),
+    ...extras,
+  }))
+}
+
+function isStillTalking(): boolean {
+  return tts.isSpeaking()
 }
 
 export const useMushroomStore = create<MushroomState>()(
@@ -107,16 +134,15 @@ export const useMushroomStore = create<MushroomState>()(
     }),
 
     sendMessage: async (text) => {
-      const { conversationHistory, hunger, boredom, evolution, lastChatTime } = get()
+      const { conversationHistory, hunger, boredom, evolution, isConversing } = get()
 
-      // Rate limit: enforce cooldown between messages
-      if (Date.now() - lastChatTime < AI.chatCooldown) return
+      // isConversing already prevents overlapping API calls
+      if (isConversing) return
 
       const { playerName } = usePlayerStore.getState()
       const history = [...conversationHistory, { role: 'user' as const, content: text }]
-      set({ conversationHistory: history, isConversing: true, lastChatTime: Date.now() })
+      set({ conversationHistory: history, isConversing: true })
 
-      // Prune history for API call — only send last N messages
       const apiHistory = history.slice(-AI.maxHistory)
 
       let response: string
@@ -129,20 +155,73 @@ export const useMushroomStore = create<MushroomState>()(
         response = "Hmm, my thoughts feel fuzzy right now... say that again?"
       }
 
-      set((s) => ({
-        conversationHistory: [...s.conversationHistory, { role: 'assistant', content: response }],
-        lastMushroomMessage: response,
-        lastMushroomMessageId: s.lastMushroomMessageId + 1,
+      pushAssistantMessage(set, response, {
         isConversing: false,
-        boredom: Math.max(0, s.boredom - STATS.chatBoredomRelief),
-      }))
+        boredom: Math.max(0, get().boredom - STATS.chatBoredomRelief),
+      })
     },
 
-    receiveMessage: (text) => set((s) => ({
-      conversationHistory: [...s.conversationHistory, { role: 'assistant', content: text }],
-      lastMushroomMessage: text,
-      lastMushroomMessageId: s.lastMushroomMessageId + 1,
-    })),
+    receiveMessage: (text) => pushAssistantMessage(set, text),
+
+    generateMushroomMessage: async (trigger) => {
+      const { conversationHistory, hunger, boredom, evolution, isConversing } = get()
+
+      if (isConversing || isStillTalking()) return
+
+      const { playerName } = usePlayerStore.getState()
+      const apiHistory = conversationHistory.slice(-AI.maxHistory)
+
+      if (!apiHistory.length || apiHistory[0].role !== 'user') {
+        apiHistory.unshift({ role: 'user', content: '[listening]' })
+      }
+
+      set({ isConversing: true, lastChatTime: Date.now() })
+
+      for (let attempt = 0; attempt <= AI.maxRetries; attempt++) {
+        try {
+          const response = await chat({
+            messages: apiHistory,
+            systemPrompt: buildInitiationPrompt({ hunger, boredom, evolution, playerName }, trigger),
+          })
+          pushAssistantMessage(set, response, { isConversing: false })
+          return
+        } catch {
+          if (attempt < AI.maxRetries) await new Promise((r) => setTimeout(r, 1000))
+        }
+      }
+
+      // Only fall back after all retries exhausted
+      set({ isConversing: false })
+      const mode = evolution === 'dark' ? 'dark' : 'normal'
+      const fallbacks = { hunger: HUNGER_MESSAGES, thirst: THIRST_MESSAGES, boredom: BOREDOM_MESSAGES }
+      pushAssistantMessage(set, pickRandom(fallbacks[trigger][mode]))
+    },
+
+    reactToEvent: async (event) => {
+      const { conversationHistory, hunger, boredom, evolution, isConversing } = get()
+
+      if (isConversing || tts.isSpeaking()) return
+
+      const { playerName } = usePlayerStore.getState()
+      const apiHistory = conversationHistory.slice(-AI.maxHistory)
+
+      if (!apiHistory.length || apiHistory[0].role !== 'user') {
+        apiHistory.unshift({ role: 'user', content: '[listening]' })
+      }
+
+      set({ isConversing: true, lastChatTime: Date.now() })
+
+      try {
+        const response = await chat({
+          messages: apiHistory,
+          systemPrompt: buildReactionPrompt({ hunger, boredom, evolution, playerName }, event),
+        })
+        pushAssistantMessage(set, response, { isConversing: false })
+      } catch {
+        // Silent — skip reaction if API fails
+        set({ isConversing: false })
+      }
+    },
 
     tick: (dt) => set((s) => {
       if (s.evolution === 'demonic') return s

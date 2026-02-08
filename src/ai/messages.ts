@@ -96,6 +96,36 @@ export const FIREFLY_MESSAGES = {
   ],
 }
 
+export const FEED_REACTIONS = {
+  normal: [
+    "Yum yum yum!",
+    "Ooh, that's the good stuff!",
+    "My tummy says thank you!",
+    "Mmmm, delicious!",
+    "More? ...I mean, thank you!",
+  ],
+  dark: [
+    "Trying to buy forgiveness with food?",
+    "You feed me like it erases the neglect.",
+    "...it IS good though.",
+  ],
+}
+
+export const MIST_REACTIONS = {
+  normal: [
+    "Ahhh, so refreshing!",
+    "Ooh, that feels amazing!",
+    "Splishy splashy! I love it!",
+    "My cap feels so dewy and happy!",
+    "Moisture! Glorious moisture!",
+  ],
+  dark: [
+    "Water. How generous of you.",
+    "At least my withering amuses you enough to hydrate me.",
+    "...fine, that does feel nice.",
+  ],
+}
+
 export const APPROACHING_IRREVERSIBLE = [
   "I can feel it happening. The change. It's almost beautiful... Don't you want to see what I become?",
   "You had your chances. Now we get to see what happens when something cute decides it's done being cute.",

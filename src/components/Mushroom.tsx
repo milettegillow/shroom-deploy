@@ -5,7 +5,7 @@ import { useMushroomStore } from '../stores/mushroomStore'
 import { useFireflyStore } from '../stores/fireflyStore'
 import { LERP, BEHAVIOR, POKE } from '../constants'
 import { pickRandom } from '../utils/helpers'
-import { POKE_MESSAGES, FIREFLY_MESSAGES } from '../ai/messages'
+import { POKE_MESSAGES } from '../ai/messages'
 import { Mushroom as M } from '../config'
 
 const COLOR_KEYS = Object.keys(M.colors.normal) as (keyof typeof M.colors.normal)[]
@@ -80,7 +80,7 @@ export default function Mushroom() {
   useFrame(({ clock }, delta) => {
     if (!groupRef.current) return
     const t = clock.elapsedTime
-    const { evolution, hunger, boredom, lastFeedTime, lastMistTime, lastPokeTime, lastGiftTime, lastGiftCount } = useMushroomStore.getState()
+    const { evolution, hunger, boredom, lastFeedTime, lastMistTime, lastPokeTime, lastGiftTime } = useMushroomStore.getState()
     const isDark = evolution === 'dark'
     const mode = isDark ? 'dark' : 'normal'
 
@@ -89,6 +89,7 @@ export default function Mushroom() {
       lastFeedRef.current = lastFeedTime
       feedBounce.current = 1
       mouthOpen.current = 0.4
+      useMushroomStore.getState().reactToEvent('fed')
     }
     if (mouthOpen.current > 0) mouthOpen.current -= delta
 
@@ -96,6 +97,7 @@ export default function Mushroom() {
     if (lastMistTime > 0 && lastMistTime !== lastMistRef.current) {
       lastMistRef.current = lastMistTime
       mistShimmy.current = 1
+      useMushroomStore.getState().reactToEvent('misted')
     }
 
     // Poke detection
@@ -109,19 +111,7 @@ export default function Mushroom() {
       lastGiftRef.current = lastGiftTime
       giftGlow.current = 1
       feedBounce.current = 0.8
-      const store = useMushroomStore.getState()
-      const dark = evolution === 'dark'
-      let msg: string
-      if (dark) {
-        msg = pickRandom(FIREFLY_MESSAGES.dark)
-      } else if (lastGiftCount >= 10) {
-        msg = pickRandom(FIREFLY_MESSAGES.normal.lots)
-      } else if (lastGiftCount >= 5) {
-        msg = pickRandom(FIREFLY_MESSAGES.normal.many)
-      } else {
-        msg = pickRandom(FIREFLY_MESSAGES.normal.few)
-      }
-      store.receiveMessage(msg)
+      useMushroomStore.getState().reactToEvent('gifted')
     }
 
     // Decay animations

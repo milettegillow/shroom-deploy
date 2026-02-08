@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 20;
   pointer-events: auto;
   animation: fadeIn 0.3s ease-out;
@@ -91,7 +91,7 @@
 
 .backdropCelebrate {
   composes: backdrop;
-  background: radial-gradient(circle at 50% 40%, rgba(80, 180, 80, 0.18) 0%, rgba(0, 0, 0, 0.5) 70%);
+  background: radial-gradient(circle at 50% 40%, rgba(80, 180, 80, 0.18) 0%, rgba(0, 0, 0, 0.7) 70%);
 }
 
 .celebration {

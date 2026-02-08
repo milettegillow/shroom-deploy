@@ -31,10 +31,8 @@ const TUTORIAL_STEPS: Partial<Record<AgeStage, TutorialStep[]>> = {
     { callouts: [
       { target: 'mist-meter', label: 'Hydration level' },
       { target: 'mist-button', label: 'Tap, then hold on shroom' },
-    ], celebration: true },
-    { callouts: [
       { target: 'new-food', label: 'New food feeds more, but slower recharge', below: true },
-    ]},
+    ], celebration: true },
   ],
   3: [
     { callouts: [
