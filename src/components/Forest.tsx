@@ -158,17 +158,17 @@ const SKY_CLOUDS: CloudConfig[] = [
 
 const FOG_CLOUDS: CloudConfig[] = [
   // Main ground mist — wide center
-  { position: [0, -0.1, -1],  speed: 0.12, opacity: { normal: 0.45, dark: 0.5 },  segments: 12, bounds: [16, 1.2, 12], volume: 4,   color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 7 },
+  { position: [0, -0.1, -1],  speed: 0.12, opacity: { normal: 0.35, dark: 0.5 },  segments: 12, bounds: [16, 1.2, 12], volume: 3.2, color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 7 },
   // Left bank mist
-  { position: [-3, 0.1, -3],  speed: 0.08, opacity: { normal: 0.38, dark: 0.45 }, segments: 10, bounds: [10, 1.0, 8],  volume: 3.5, color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 23 },
+  { position: [-3, 0.1, -3],  speed: 0.08, opacity: { normal: 0.3,  dark: 0.45 }, segments: 10, bounds: [10, 1.0, 8],  volume: 2.8, color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 23 },
   // Right bank mist
-  { position: [4, 0, -1.5],   speed: 0.10, opacity: { normal: 0.4,  dark: 0.45 }, segments: 8,  bounds: [10, 1.0, 8],  volume: 3.5, color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 51 },
+  { position: [4, 0, -1.5],   speed: 0.10, opacity: { normal: 0.32, dark: 0.45 }, segments: 8,  bounds: [10, 1.0, 8],  volume: 2.8, color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 51 },
   // Right mid-ground haze
-  { position: [5, 0.2, -4],   speed: 0.07, opacity: { normal: 0.35, dark: 0.4 },  segments: 6,  bounds: [8, 0.8, 6],   volume: 3,   color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 41 },
+  { position: [5, 0.2, -4],   speed: 0.07, opacity: { normal: 0.28, dark: 0.4 },  segments: 6,  bounds: [8, 0.8, 6],   volume: 2.4, color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 41 },
   // Center-back depth haze
-  { position: [0, 0.2, -5],   speed: 0.06, opacity: { normal: 0.32, dark: 0.4 },  segments: 10, bounds: [14, 0.8, 8],  volume: 3,   color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 63 },
+  { position: [0, 0.2, -5],   speed: 0.06, opacity: { normal: 0.25, dark: 0.4 },  segments: 10, bounds: [14, 0.8, 8],  volume: 2.4, color: { normal: Color.CLOUD_FOG_NORMAL_B, dark: Color.CLOUD_FOG_DARK_B }, seed: 63 },
   // Foreground wisps — right side
-  { position: [2, 0.3, 1],    speed: 0.14, opacity: { normal: 0.25, dark: 0.35 }, segments: 6,  bounds: [8, 0.6, 4],   volume: 2.5, color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 88 },
+  { position: [2, 0.3, 1],    speed: 0.14, opacity: { normal: 0.2,  dark: 0.35 }, segments: 6,  bounds: [8, 0.6, 4],   volume: 2.0, color: { normal: Color.CLOUD_FOG_NORMAL,   dark: Color.CLOUD_FOG_DARK }, seed: 88 },
 ]
 
 const ALL_CLOUDS = [...SKY_CLOUDS, ...FOG_CLOUDS]
@@ -391,6 +391,93 @@ function Moon({ evolution }: { evolution: EvolutionState }) {
         />
       </mesh>
       <pointLight ref={lightRef} color={Env.moonLightColor} intensity={0.6} distance={30} />
+    </group>
+  )
+}
+
+// Soft gradient texture for god rays — bright center fading to transparent edges
+function createRayTexture(): THREE.CanvasTexture {
+  const size = 64
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size * 4
+  const ctx = canvas.getContext('2d')!
+
+  // Vertical gradient: transparent top → bright center → transparent bottom
+  const grad = ctx.createLinearGradient(0, 0, 0, size * 4)
+  grad.addColorStop(0, 'rgba(160, 200, 240, 0)')
+  grad.addColorStop(0.15, 'rgba(160, 200, 240, 0.12)')
+  grad.addColorStop(0.4, 'rgba(180, 220, 255, 0.25)')
+  grad.addColorStop(0.6, 'rgba(180, 220, 255, 0.25)')
+  grad.addColorStop(0.85, 'rgba(160, 200, 240, 0.12)')
+  grad.addColorStop(1, 'rgba(160, 200, 240, 0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, size, size * 4)
+
+  // Horizontal fade: transparent edges → opaque center
+  const imgData = ctx.getImageData(0, 0, size, size * 4)
+  const d = imgData.data
+  const halfW = size / 2
+  for (let y = 0; y < size * 4; y++) {
+    for (let x = 0; x < size; x++) {
+      const idx = (y * size + x) * 4
+      const dist = Math.abs(x - halfW) / halfW
+      const fade = Math.max(0, 1 - dist * dist)
+      d[idx + 3] = Math.floor(d[idx + 3] * fade)
+    }
+  }
+  ctx.putImageData(imgData, 0, 0)
+
+  const tex = new THREE.CanvasTexture(canvas)
+  tex.needsUpdate = true
+  return tex
+}
+
+function GodRays({ evolution }: { evolution: EvolutionState }) {
+  const matsRef = useRef<THREE.MeshBasicMaterial[]>([])
+  const mode = evolution === 'dark' ? 'dark' : 'normal'
+  const rayTexture = useMemo(() => createRayTexture(), [])
+
+  useFrame((state) => {
+    const targetAlpha = mode === 'normal' ? 1 : 0
+    matsRef.current.forEach((mat, i) => {
+      if (!mat) return
+      const base = targetAlpha * (0.7 + (i % 3) * 0.15)
+      const shimmer = Math.sin(state.clock.elapsedTime * 0.25 + i * 2.1) * 0.15
+      mat.opacity += (base + shimmer - mat.opacity) * LERP
+    })
+  })
+
+  const rays = useMemo(() => [
+    { pos: [0.5, 4, -5] as const, rot: [0.08, 0, 0.06] as const, w: 2.0, h: 12 },
+    { pos: [-2, 4, -6] as const, rot: [0.06, 0, -0.1] as const, w: 2.5, h: 14 },
+    { pos: [3, 4, -7] as const, rot: [0.04, 0, 0.14] as const, w: 1.8, h: 11 },
+    { pos: [-0.8, 4, -4] as const, rot: [0.1, 0, -0.03] as const, w: 1.5, h: 10 },
+    { pos: [2, 4, -8] as const, rot: [0.03, 0, 0.05] as const, w: 2.2, h: 13 },
+  ], [])
+
+  return (
+    <group>
+      {rays.map((r, i) => (
+        <mesh
+          key={i}
+          position={r.pos}
+          rotation={r.rot}
+          renderOrder={-1}
+        >
+          <planeGeometry args={[r.w, r.h]} />
+          <meshBasicMaterial
+            ref={(el) => { if (el) matsRef.current[i] = el }}
+            map={rayTexture}
+            transparent
+            opacity={0}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
+            fog={false}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }
@@ -725,7 +812,7 @@ export default function Forest() {
       </mesh>
 
       <Moon evolution={evolution} />
-
+      <GodRays evolution={evolution} />
       {/* Lightning flash light */}
       <pointLight ref={lightningRef} position={[0, 10, -4]} color="#c8d8ff" intensity={0} distance={60} />
 

@@ -96,21 +96,21 @@ export const Color = {
   CANOPY_EMISSIVE_DARK: "#3860b0",
 
   // Sky – brighter enchanted blues
-  SKY_NORMAL_TOP: "#142860",
-  SKY_NORMAL_MID: "#2858a0",
-  SKY_NORMAL_BOT: "#4080b8",
+  SKY_NORMAL_TOP: "#1c3878",
+  SKY_NORMAL_MID: "#3868b8",
+  SKY_NORMAL_BOT: "#5898d0",
   SKY_DARK_TOP: "#122450",
   SKY_DARK_MID: "#224c90",
   SKY_DARK_BOT: "#3870a8",
 
   // Ground
-  GROUND_NORMAL: "#1e4838",
+  GROUND_NORMAL: "#2a5848",
   GROUND_DARK: "#1c4032",
   BANK_NORMAL: "#2a5a3a",
   BANK_DARK: "#265234",
 
   // Fog
-  FOG_BLUE: "#1c2858",
+  FOG_BLUE: "#2a4880",
   FOG_DARK: "#141c40",
 
   // Smoke / ground particles
@@ -299,8 +299,8 @@ export const Env = {
       canopy: new THREE.Color(Color.CANOPY_EMISSIVE_DARK),
     },
   },
-  trunkEmissiveIntensity: { normal: 0.25, dark: 0.20 },
-  canopyEmissiveIntensity: { normal: 0.4, dark: 0.30 },
+  trunkEmissiveIntensity: { normal: 0.4, dark: 0.20 },
+  canopyEmissiveIntensity: { normal: 0.6, dark: 0.30 },
   skyColors: {
     normal: {
       top: new THREE.Color(Color.SKY_NORMAL_TOP),
@@ -322,13 +322,13 @@ export const Env = {
     dark: new THREE.Color(Color.BANK_DARK),
   },
   fogColor: { normal: Color.FOG_BLUE, dark: Color.FOG_DARK },
-  fogDensity: { normal: 0.045, dark: 0.09 },
+  fogDensity: { normal: 0.035, dark: 0.09 },
   smokeColor: { normal: Color.SMOKE_NORMAL, dark: Color.SMOKE_DARK },
   smokeOpacity: { normal: 0.25, dark: 0.25 },
   moonColor: new THREE.Color(Color.MOON_COOL),
   moonLightColor: Color.MOON_LIGHT_COOL,
   moonOpacity: { normal: 0.9, dark: 0.7 },
-  moonLightIntensity: { normal: 1.5, dark: 1.0 },
+  moonLightIntensity: { normal: 2.2, dark: 1.0 },
   moonPosition: [4, 8, -6] as const,
   moonRadius: 1.5,
   skyRadius: 50,
@@ -345,7 +345,7 @@ export const Env = {
 
 export const Lighting = {
   colors: {
-    ambient: { normal: { intensity: 0.9 }, dark: { intensity: 0.72 } },
+    ambient: { normal: { intensity: 1.3 }, dark: { intensity: 0.72 } },
     directional: {
       normal: { intensity: 2.0, color: new THREE.Color(Color.LIGHT_BLUE_WHITE) },
       dark: { intensity: 1.6, color: new THREE.Color(Color.DARK_COLD_GREY) },
@@ -355,7 +355,7 @@ export const Lighting = {
       dark: { intensity: 1.0, color: new THREE.Color(Color.DARK_ACCENT_TEAL) },
     },
     fill: {
-      normal: { intensity: 1.2, color: new THREE.Color(Color.FILL_WARM_CYAN) },
+      normal: { intensity: 1.8, color: new THREE.Color(Color.FILL_WARM_CYAN) },
       dark: { intensity: 1.0, color: new THREE.Color(Color.DARK_FILL_CADET) },
     },
     rim: {
