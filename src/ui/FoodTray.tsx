@@ -21,13 +21,13 @@ const GLB_FOODS: Record<
   }
 > = {
   barkChip: {
-    path: "https://corsproxy.io/?https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/bark.glb",
+    path: "/bark.glb",
     scale: 0.05,
     rotation: [0.4, 0.3, 0],
     position: [0, 0, 0] as [number, number, number],
   },
   deadLeaf: {
-    path: "https://corsproxy.io/?https://github.com/milettegillow/shroom-deploy/releases/download/v1.0/leaf.glb",
+    path: "/leaf.glb",
     scale: 15.0,
     rotation: [0.4, 0.3, 0],
     position: [0, -0.8, 0] as [number, number, number],
