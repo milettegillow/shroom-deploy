@@ -49,8 +49,8 @@ function getRandomAnimation(): string {
 const _projVec = new THREE.Vector3();
 
 export default function Mushroom() {
-  const cuteGltf = useGLTF("/mushroom-cute.glb");
-  const evilGltf = useGLTF("/mushroom-evil.glb");
+  const cuteGltf = useGLTF("/Mushroom-cute.glb");
+  const evilGltf = useGLTF("/Mushroom-evil.glb");
 
   const cuteGroupRef = useRef<THREE.Group>(null);
   const evilGroupRef = useRef<THREE.Group>(null);
