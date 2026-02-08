@@ -21,7 +21,7 @@ export const BEHAVIOR = {
   complaintInterval: 12000,
   boredomCheckInterval: 3000,
   checkInterval: 500,
-  messageCooldown: 10000,
+  messageCooldown: 5000,
   irreversibleTimer: 10,
 } as const
 
@@ -29,14 +29,13 @@ export const TIMING = {
   maxFrameDelta: 0.1,
   speechBubbleDuration: 5000,
   speechBubbleFade: 500,
-  reactionCooldown: 9000,
+  reactionCooldown: 8000,
 } as const
 
 export const AI = {
   model: 'claude-haiku-4-5-20251001',
   maxTokens: 60,
   maxHistory: 20,
-  chatCooldown: 5000,
   maxRetries: 2,
 } as const
 

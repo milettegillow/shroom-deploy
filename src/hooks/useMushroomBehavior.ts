@@ -11,11 +11,12 @@ export function useMushroomBehavior() {
       const gameState = useGameStore.getState()
       if (gameState.phase !== 'playing' || gameState.paused) return
 
-      const { hunger, boredom, thirst, evolution, isConversing, generateMushroomMessage, stage } =
+      const { hunger, boredom, thirst, evolution, isConversing, generateMushroomMessage, stage, lastMessageTime } =
         useMushroomStore.getState()
 
-      // Skip if TTS voice is still playing or an API call is in-flight
-      if (tts.isSpeaking() || isConversing) return
+      // Skip if speaking (with 6s safety valve) or API call in-flight
+      const speaking = tts.isSpeaking() && Date.now() - lastMessageTime < 6000
+      if (speaking || isConversing) return
 
       const trigger = conversationManager.update(
         Date.now(), hunger, boredom, thirst, evolution, isConversing, 0, stage,

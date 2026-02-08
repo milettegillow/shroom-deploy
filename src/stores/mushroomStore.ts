@@ -5,7 +5,7 @@ import { buildSystemPrompt, buildInitiationPrompt, buildReactionPrompt } from '.
 import type { InitiationTrigger, ReactionEvent } from '../ai/prompts'
 import { HUNGER_MESSAGES, THIRST_MESSAGES, BOREDOM_MESSAGES } from '../ai/messages'
 import { pickRandom } from '../utils/helpers'
-import { STATS, MIST, JAR, FOOD_TYPES, STAGES, AI } from '../constants'
+import { STATS, MIST, JAR, FOOD_TYPES, STAGES, AI, TIMING } from '../constants'
 import { tts } from '../audio/ttsService'
 import { DEV } from '../devMode'
 import { usePlayerStore } from './playerStore'
@@ -26,6 +26,7 @@ interface MushroomState {
   lastPokeTime: number
   lastGiftTime: number
   lastChatTime: number
+  lastReactionTime: number
   lastGiftCount: number
   stage: AgeStage
   totalFeeds: number
@@ -56,6 +57,7 @@ const INITIAL: Omit<MushroomState, 'feed' | 'mist' | 'poke' | 'giveFireflies' | 
   lastMistTime: 0,
   lastPokeTime: 0,
   lastChatTime: 0,
+  lastReactionTime: 0,
   lastGiftTime: 0,
   lastGiftCount: 0,
   stage: 1 as AgeStage,
@@ -91,7 +93,9 @@ function pushAssistantMessage(
   }))
 }
 
-function isStillTalking(): boolean {
+/** TTS check with safety valve — never blocks for more than 6s even if browser gets stuck */
+function isStillTalking(lastMessageTime: number): boolean {
+  if (Date.now() - lastMessageTime > 6000) return false
   return tts.isSpeaking()
 }
 
@@ -151,7 +155,8 @@ export const useMushroomStore = create<MushroomState>()(
           messages: apiHistory,
           systemPrompt: buildSystemPrompt({ hunger, boredom, evolution, playerName }),
         })
-      } catch {
+      } catch (err) {
+        console.warn('[shroom] sendMessage API failed:', err)
         response = "Hmm, my thoughts feel fuzzy right now... say that again?"
       }
 
@@ -164,16 +169,19 @@ export const useMushroomStore = create<MushroomState>()(
     receiveMessage: (text) => pushAssistantMessage(set, text),
 
     generateMushroomMessage: async (trigger) => {
-      const { conversationHistory, hunger, boredom, evolution, isConversing } = get()
+      const { conversationHistory, hunger, boredom, evolution, isConversing, lastMessageTime } = get()
 
-      if (isConversing || isStillTalking()) return
+      if (isConversing || isStillTalking(lastMessageTime)) return
 
       const { playerName } = usePlayerStore.getState()
       const apiHistory = conversationHistory.slice(-AI.maxHistory)
 
-      if (!apiHistory.length || apiHistory[0].role !== 'user') {
-        apiHistory.unshift({ role: 'user', content: '[listening]' })
+      // Ensure first message is user (API requirement)
+      if (apiHistory.length && apiHistory[0].role !== 'user') {
+        apiHistory.unshift({ role: 'user', content: '...' })
       }
+      // Append prompt at the END so the model responds to it
+      apiHistory.push({ role: 'user', content: 'Hey little mushroom, what are you thinking about?' })
 
       set({ isConversing: true, lastChatTime: Date.now() })
 
@@ -185,7 +193,8 @@ export const useMushroomStore = create<MushroomState>()(
           })
           pushAssistantMessage(set, response, { isConversing: false })
           return
-        } catch {
+        } catch (err) {
+          console.warn(`[shroom] initiation attempt ${attempt + 1}/${AI.maxRetries + 1} failed:`, err)
           if (attempt < AI.maxRetries) await new Promise((r) => setTimeout(r, 1000))
         }
       }
@@ -198,18 +207,39 @@ export const useMushroomStore = create<MushroomState>()(
     },
 
     reactToEvent: async (event) => {
-      const { conversationHistory, hunger, boredom, evolution, isConversing } = get()
+      // Respect reaction cooldown (check early, before waiting)
+      if (Date.now() - get().lastReactionTime < TIMING.reactionCooldown) return
 
-      if (isConversing || tts.isSpeaking()) return
+      // Wait up to 5s for any in-flight conversation to finish
+      for (let i = 0; i < 10; i++) {
+        const { isConversing, lastMessageTime } = get()
+        if (!isConversing && !isStillTalking(lastMessageTime)) break
+        await new Promise((r) => setTimeout(r, 500))
+      }
+
+      // Final check after waiting
+      const { conversationHistory, hunger, boredom, evolution, isConversing, lastReactionTime, lastMessageTime } = get()
+      if (isConversing || isStillTalking(lastMessageTime)) return
+      if (Date.now() - lastReactionTime < TIMING.reactionCooldown) return
 
       const { playerName } = usePlayerStore.getState()
       const apiHistory = conversationHistory.slice(-AI.maxHistory)
 
-      if (!apiHistory.length || apiHistory[0].role !== 'user') {
-        apiHistory.unshift({ role: 'user', content: '[listening]' })
+      // Event cue MUST be the last user message so the model responds to it
+      const eventCue: Record<ReactionEvent, string> = {
+        fed: 'Here, eat this!',
+        misted: 'Let me spray you with some water!',
+        gifted: 'I caught some fireflies for you!',
       }
+      // Ensure first message is user (API requirement)
+      if (apiHistory.length && apiHistory[0].role !== 'user') {
+        apiHistory.unshift({ role: 'user', content: '...' })
+      }
+      // Append event cue at the END so the model responds to it
+      apiHistory.push({ role: 'user', content: eventCue[event] })
 
-      set({ isConversing: true, lastChatTime: Date.now() })
+      // Note: sets lastReactionTime, NOT lastChatTime — reactions don't delay initiations
+      set({ isConversing: true, lastReactionTime: Date.now() })
 
       try {
         const response = await chat({
@@ -217,8 +247,8 @@ export const useMushroomStore = create<MushroomState>()(
           systemPrompt: buildReactionPrompt({ hunger, boredom, evolution, playerName }, event),
         })
         pushAssistantMessage(set, response, { isConversing: false })
-      } catch {
-        // Silent — skip reaction if API fails
+      } catch (err) {
+        console.warn('[shroom] reactToEvent failed:', err)
         set({ isConversing: false })
       }
     },
