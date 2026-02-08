@@ -36,8 +36,8 @@ export default function FoodProjectile() {
     start: new THREE.Vector3(), elapsed: 0,
   })
   const { camera } = useThree()
-  const barkGltf = useGLTF('/bark.glb')
-  const leafGltf = useGLTF('/leaf.glb')
+  const barkGltf = useGLTF('/gh-assets/bark.glb')
+  const leafGltf = useGLTF('/gh-assets/leaf.glb')
   const logGltf = useGLTF('/log.glb')
 
   function showOnly(type: FoodType | null) {

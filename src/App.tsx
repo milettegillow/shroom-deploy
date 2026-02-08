@@ -1,7 +1,17 @@
 import { Canvas } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import Scene from "./components/Scene";
 import { useMultiplayer } from "./hooks/useMultiplayer";
 import HUD from "./ui/HUD";
+
+// Kick off all GLB downloads immediately so they load during the title screen
+useGLTF.preload("/Mushroom-cute.glb");
+useGLTF.preload("/Mushroom-evil.glb");
+useGLTF.preload("/gh-assets/bark.glb");
+useGLTF.preload("/gh-assets/leaf.glb");
+useGLTF.preload("/log.glb");
+useGLTF.preload("/splash.glb");
+useGLTF.preload("/jar.glb");
 
 export default function App() {
   const { ready } = useMultiplayer();

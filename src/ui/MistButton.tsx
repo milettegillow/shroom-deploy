@@ -14,6 +14,18 @@ function SplashModel() {
   const gltf = useGLTF("/splash.glb");
   const ref = useRef<THREE.Group>(null);
 
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach((mat) => {
+          if ('color' in mat) (mat as THREE.MeshStandardMaterial).color.set('#4dc8ff');
+        });
+      }
+    });
+  }, []);
+
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.rotation.y = clock.elapsedTime * 0.8;

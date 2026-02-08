@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useGameStore } from "../stores/gameStore";
+import { useAssetProgress } from "../hooks/useAssetProgress";
+import { music } from "../audio/musicService";
 import styles from "./TitleScreen.module.css";
 
 interface Particle {
@@ -77,9 +79,18 @@ export default function TitleScreen() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const startGame = useGameStore((s) => s.startGame);
   const startedRef = useRef(false);
+  const { progress, loaded } = useAssetProgress();
+  const loadedRef = useRef(false);
+  loadedRef.current = loaded;
+  const progressRef = useRef(0);
+  progressRef.current = progress;
+
+  // Start music as soon as the title screen mounts; musicService retries on
+  // first user gesture if the browser blocks autoplay.
+  useEffect(() => { music.play(); }, []);
 
   const handleClick = useCallback(() => {
-    if (startedRef.current) return;
+    if (startedRef.current || !loadedRef.current) return;
     startedRef.current = true;
     overlayRef.current?.classList.add(styles.fadeOut);
     setTimeout(() => startGame(), 600);
@@ -152,9 +163,22 @@ export default function TitleScreen() {
     const SUBTITLE_FADE_START = CONVERGE_END + 0.5;
     const STUDIO_FADE_START = SUBTITLE_FADE_START + 0.8;
 
+    let displayProgress = 0;
+    let loadedAt = 0; // timestamp when loading finished
+
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const elapsed = (timestamp - startTime) / 1000;
+
+      // Track when loading first completes
+      if (loadedRef.current && !loadedAt) loadedAt = timestamp;
+
+      // Smooth loading bar: time-based curve to 90%, snaps to 100% when done
+      const fakeTarget = loadedRef.current ? 1 : 0.9 * (1 - Math.exp(-elapsed * 0.12));
+      displayProgress += (fakeTarget - displayProgress) * 0.05;
+
+      // Show bar for 500ms after loading completes so user sees 100%
+      const showBar = !loadedAt || (timestamp - loadedAt) < 500;
 
       ctx.clearRect(0, 0, W, H);
 
@@ -214,21 +238,43 @@ export default function TitleScreen() {
         }
       }
 
-      // "Tap to Start"
+      // Loading bar or "Tap to Start"
       if (elapsed > SUBTITLE_FADE_START) {
         const subtitleAlpha = Math.min(
           1,
           (elapsed - SUBTITLE_FADE_START) / 1.5,
         );
-        const pulse = 0.7 + 0.3 * Math.sin(elapsed * 2);
-        ctx.save();
-        ctx.globalAlpha = subtitleAlpha * pulse;
-        ctx.fillStyle = "#ffffff";
-        ctx.font = `${Math.min(W * 0.04, 28)}px sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("Tap to Start", W / 2, H * 0.52);
-        ctx.restore();
+
+        if (loadedRef.current && !showBar) {
+          // Ready — show "Tap to Start"
+          const pulse = 0.7 + 0.3 * Math.sin(elapsed * 2);
+          ctx.save();
+          ctx.globalAlpha = subtitleAlpha * pulse;
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `${Math.min(W * 0.04, 28)}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Tap to Start", W / 2, H * 0.52);
+          ctx.restore();
+        } else {
+          // Loading — show progress bar
+          const barW = Math.min(W * 0.4, 240);
+          const barH = 4;
+          const barX = W / 2 - barW / 2;
+          const barY = H * 0.52;
+          ctx.save();
+          ctx.globalAlpha = subtitleAlpha * 0.5;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+          ctx.beginPath();
+          ctx.roundRect(barX, barY, barW, barH, barH / 2);
+          ctx.fill();
+          ctx.globalAlpha = subtitleAlpha * 0.9;
+          ctx.fillStyle = "rgba(255, 230, 160, 0.8)";
+          ctx.beginPath();
+          ctx.roundRect(barX, barY, barW * displayProgress, barH, barH / 2);
+          ctx.fill();
+          ctx.restore();
+        }
       }
 
       // Studio credit

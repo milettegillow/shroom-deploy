@@ -34,7 +34,9 @@ export default function ChatBox() {
   return (
     <div className={styles.chatBox}>
       {showSent && (
-        <div className={`${styles.sentMsg} ${fading ? styles.sentFadeOut : ""}`}>
+        <div
+          className={`${styles.sentMsg} ${fading ? styles.sentFadeOut : ""}`}
+        >
           {sentText}
         </div>
       )}

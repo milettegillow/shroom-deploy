@@ -8,8 +8,8 @@ export function useMusic() {
     return useGameStore.subscribe((state) => {
       if (state.phase === prevPhase) return
       prevPhase = state.phase
-      if (state.phase === 'playing') music.play()
-      else music.pause()
+      if (state.phase === 'gameOver') music.pause()
+      else if (state.phase === 'playing') music.play()
     })
   }, [])
 }

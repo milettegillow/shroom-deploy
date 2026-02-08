@@ -21,13 +21,13 @@ const GLB_FOODS: Record<
   }
 > = {
   barkChip: {
-    path: "/bark.glb",
+    path: "/gh-assets/bark.glb",
     scale: 0.05,
     rotation: [0.4, 0.3, 0],
     position: [0, 0, 0] as [number, number, number],
   },
   deadLeaf: {
-    path: "/leaf.glb",
+    path: "/gh-assets/leaf.glb",
     scale: 15.0,
     rotation: [0.4, 0.3, 0],
     position: [0, -0.8, 0] as [number, number, number],

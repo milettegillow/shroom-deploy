@@ -52,6 +52,12 @@
   box-shadow: 0 0 12px rgba(100, 180, 255, 0.4);
 }
 
+.buttonGlb.active {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
 .emoji {
   font-size: var(--fs-emoji);
   line-height: 1;
